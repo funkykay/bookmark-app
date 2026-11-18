@@ -4,6 +4,7 @@ import type { BookmarkStore } from '../bookmarks/store';
 import { element } from '../dom';
 import type { PinControls } from '../pin/view';
 import type { View } from '../views';
+import { initAppearance } from './appearance';
 
 interface Options {
   store: BookmarkStore;
@@ -12,6 +13,7 @@ interface Options {
 }
 
 export function initSettings({ store, pin, notify }: Options): View {
+  const clearAppearance = initAppearance(notify);
   const pinSwitch = element('pinSwitch', 'button');
   const changeButton = element('changePinButton', 'button');
 
@@ -59,9 +61,9 @@ export function initSettings({ store, pin, notify }: Options): View {
   }
 
   function purgeData(): void {
-    if (!window.confirm('Alle Lesezeichen und PIN-Einstellungen in diesem Browser endgültig löschen?')) return;
+    if (!window.confirm('Alle Lesezeichen löschen und die Einstellungen für PIN und Darstellung in diesem Browser zurücksetzen?')) return;
     purgeVersion++;
-    if (!store.save([]) || !pin.clearSettings()) return;
+    if (!store.save([]) || !pin.clearSettings() || !clearAppearance()) return;
     render();
     notify('Alle App-Daten wurden gelöscht.');
   }

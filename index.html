@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#f7f8fa" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#101114" media="(prefers-color-scheme: dark)">
+  <meta id="themeColor" name="theme-color" content="#f7f8fa">
   <title>Lesezeichen</title>
 </head>
 <body>
@@ -67,6 +66,27 @@
       <h1 id="settingsTitle" tabindex="-1">Einstellungen</h1>
       <button id="backFromSettings" class="done-button" type="button">Zurück</button>
     </header>
+    <section class="settings-group" aria-labelledby="appearanceTitle">
+      <h2 id="appearanceTitle">Darstellung</h2>
+      <form id="appearanceForm">
+        <fieldset>
+          <legend>Modus</legend>
+          <div class="mode-options">
+            <label><input class="sr-only" type="radio" name="mode" value="system" checked><span>System</span></label>
+            <label><input class="sr-only" type="radio" name="mode" value="light"><span>Hell</span></label>
+            <label><input class="sr-only" type="radio" name="mode" value="dark"><span>Dunkel</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Farbwelt</legend>
+          <div class="palette-options">
+            <label><input class="sr-only" type="radio" name="palette" value="glacier" checked><span class="swatch glacier">Gletscher</span></label>
+            <label><input class="sr-only" type="radio" name="palette" value="lagoon"><span class="swatch lagoon">Lagune</span></label>
+            <label><input class="sr-only" type="radio" name="palette" value="sunset"><span class="swatch sunset">Abendrot</span></label>
+          </div>
+        </fieldset>
+      </form>
+    </section>
     <section class="settings-group" aria-labelledby="securityTitle">
       <h2 id="securityTitle">Sicherheit</h2>
       <div class="pin-settings-row">
