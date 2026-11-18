@@ -6,11 +6,12 @@ export interface Bookmark {
   updated: string;
 }
 
-const storageKey = 'donni-lesezeichen-v1';
 export const maxNameLength = 100;
+const formatVersion = 2;
 
 export function createId(): string {
-  return crypto.randomUUID?.() ?? crypto.getRandomValues(new Uint32Array(4)).join('-');
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
 export function normalizeUrl(input: string): string | null {
@@ -35,56 +36,41 @@ function isTimestamp(value: unknown): value is string {
   return Number.isFinite(date.getTime()) && date.toISOString() === value;
 }
 
-function parseEntry(input: unknown): Bookmark | null {
-  if (typeof input !== 'object' || input === null || !('url' in input) || typeof input.url !== 'string') return null;
-  if (!('creation' in input) || !isTimestamp(input.creation)) return null;
-  if (!('updated' in input) || !isTimestamp(input.updated)) return null;
-
-  const url = normalizeUrl(input.url);
-  if (!url) return null;
-
-  const name = 'name' in input && typeof input.name === 'string' ? input.name.trim().slice(0, maxNameLength) : '';
-  const id = 'id' in input && typeof input.id === 'string' && input.id ? input.id : createId();
-  return { id, name: name || hostname(url), url, creation: input.creation, updated: input.updated };
-}
-
-function parseEntries(input: unknown[]): Bookmark[] {
-  return input.map(parseEntry).filter((entry) => entry !== null);
-}
-
-export function loadBookmarks(): Bookmark[] {
-  const stored = localStorage.getItem(storageKey);
-  if (stored === null) return [];
-
-  let data: unknown;
-  try {
-    data = JSON.parse(stored);
-  } catch {
-    return [];
+function parseBookmark(input: unknown): Bookmark {
+  if (typeof input !== 'object' || input === null) throw new Error('Ungültiges Lesezeichen');
+  if (!('id' in input) || typeof input.id !== 'string' || !/^[a-f0-9]{32}$/.test(input.id)) {
+    throw new Error('Ungültige Lesezeichen-ID');
   }
-  if (!Array.isArray(data)) return [];
-
-  const ids = new Set<string>();
-  return parseEntries(data).map((entry) => {
-    const id = ids.has(entry.id) ? createId() : entry.id;
-    ids.add(id);
-    return { ...entry, id };
-  });
+  if (!('name' in input) || typeof input.name !== 'string' || !input.name
+    || input.name !== input.name.trim() || input.name.length > maxNameLength) {
+    throw new Error('Ungültiger Lesezeichenname');
+  }
+  if (!('url' in input) || typeof input.url !== 'string' || normalizeUrl(input.url) !== input.url) {
+    throw new Error('Ungültige Lesezeichen-URL');
+  }
+  if (!('creation' in input) || !isTimestamp(input.creation)
+    || !('updated' in input) || !isTimestamp(input.updated)) {
+    throw new Error('Ungültiger Lesezeichen-Zeitstempel');
+  }
+  const { id, name, url, creation, updated } = input;
+  return { id, name, url, creation, updated };
 }
 
-export function saveBookmarks(bookmarks: readonly Bookmark[]): void {
-  if (bookmarks.length) localStorage.setItem(storageKey, JSON.stringify(bookmarks));
-  else localStorage.removeItem(storageKey);
+export function serializeBookmarks(bookmarks: readonly Bookmark[]): string {
+  return JSON.stringify({ version: formatVersion, bookmarks }, null, 2);
 }
 
-export function parseImport(text: string): Bookmark[] {
+export function parseBookmarks(text: string): Bookmark[] {
   const data: unknown = JSON.parse(text);
-  if (typeof data !== 'object' || data === null || !('bookmarks' in data) || !Array.isArray(data.bookmarks)) {
+  if (typeof data !== 'object' || data === null || !('version' in data) || data.version !== formatVersion
+    || !('bookmarks' in data) || !Array.isArray(data.bookmarks)) {
     throw new Error('Ungültiges Lesezeichenformat');
   }
-  const entries = data.bookmarks;
-
-  const bookmarks = parseEntries(entries);
-  if (entries.length && !bookmarks.length) throw new Error('Keine gültigen Lesezeichen in der Datei');
-  return bookmarks;
+  const ids = new Set<string>();
+  return data.bookmarks.map((input: unknown) => {
+    const bookmark = parseBookmark(input);
+    if (ids.has(bookmark.id)) throw new Error('Doppelte Lesezeichen-ID');
+    ids.add(bookmark.id);
+    return bookmark;
+  });
 }
