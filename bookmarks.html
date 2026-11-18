@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#f7f8fa" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#101114" media="(prefers-color-scheme: dark)">
+  <title>Lesezeichen</title>
+  <style>
+    :root {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+      color-scheme: light dark;
+      --bg: #f7f8fa;
+      --surface: #ffffff;
+      --text: #17191d;
+      --muted: #777c85;
+      --line: #e9ebee;
+      --soft: #f0f2f5;
+      --accent: #007aff;
+      --accent-tint: #eaf3ff;
+      --shadow: 0 13px 48px rgba(19, 27, 40, .13);
+      --danger: #e04242;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #101114;
+        --surface: #1c1e22;
+        --text: #f4f5f7;
+        --muted: #9a9da5;
+        --line: #2e3137;
+        --soft: #272a30;
+        --accent: #4b9fff;
+        --accent-tint: #193452;
+        --shadow: 0 18px 60px rgba(0, 0, 0, .55);
+        --danger: #ff6868;
+      }
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { margin: 0; min-height: 100svh; background: var(--bg); color: var(--text); }
+    button, input { font: inherit; }
+    button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+    .app { max-width: 680px; margin: auto; padding: calc(34px + env(safe-area-inset-top)) 20px calc(56px + env(safe-area-inset-bottom)); }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 25px; }
+    h1 { margin: 0; font-size: clamp(29px, 6vw, 37px); font-weight: 720; letter-spacing: -.045em; line-height: 1.1; }
+    .actions { position: relative; display: flex; gap: 8px; align-items: center; }
+    .icon-button { width: 45px; height: 45px; border: 0; border-radius: 14px; display: grid; place-items: center; color: var(--text); background: var(--surface); }
+    .icon-button.primary { color: #fff; background: #007aff; }
+    .icon-button svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .search { display: flex; align-items: center; gap: 11px; height: 51px; background: var(--surface); border: 1px solid var(--line); border-radius: 15px; padding: 0 15px; margin-bottom: 19px; }
+    .search svg { color: var(--muted); width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+    .search input { background: transparent; color: var(--text); width: 100%; border: 0; outline: none; font-size: 16px; min-width: 0; }
+    .search input::placeholder { color: var(--muted); }
+    .search input:focus-visible { outline: 0; }
+    .search:focus-within { border-color: var(--accent); }
+    .bookmarks { display: grid; gap: 9px; list-style: none; padding: 0; margin: 0; }
+    .bookmark { display: flex; gap: 0; align-items: stretch; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; min-height: 77px; overflow: hidden; }
+    .bookmark > a { min-width: 0; flex: 1; display: flex; gap: 14px; align-items: center; padding: 13px 0 13px 14px; color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+    .glyph { flex: none; width: 45px; height: 45px; display: grid; place-items: center; border-radius: 12px; background: var(--tile-bg); color: var(--tile-fg); font-weight: 700; font-size: 20px; letter-spacing: -.04em; }
+    .bookmark-title { min-width: 0; display: block; }
+    .name, .domain { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .name { font-size: 16px; font-weight: 600; line-height: 1.4; }
+    .domain { color: var(--muted); font-size: 13px; margin-top: 3px; line-height: 1.3; }
+    .edit { flex: none; width: 51px; border: 0; background: transparent; color: var(--muted); display: grid; place-items: center; }
+    .edit svg { width: 19px; height: 19px; fill: currentColor; }
+    .popup { position: absolute; z-index: 4; top: 54px; right: 53px; width: 178px; border: 1px solid var(--line); border-radius: 13px; padding: 5px; background: var(--surface); box-shadow: var(--shadow); }
+    .popup[hidden], .empty[hidden], .toast[hidden] { display: none; }
+    .popup button { display: block; background: transparent; border: none; color: var(--text); width: 100%; padding: 12px; border-radius: 9px; text-align: left; font-size: 15px; }
+    .popup button:active { background: var(--soft); }
+    .empty { text-align: center; color: var(--muted); padding: 75px 15px; font-size: 15px; }
+    .empty button { display: block; margin: 19px auto 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 11px 19px; color: var(--text); font-weight: 600; }
+    dialog { padding: 0; width: calc(100% - 34px); max-width: 450px; border: 1px solid var(--line); border-radius: 21px; color: var(--text); background: var(--surface); box-shadow: var(--shadow); }
+    dialog::backdrop { background: rgba(0, 0, 0, .55); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
+    .dialog-inner { padding: 25px; }
+    h2 { margin: 0 0 24px; font-size: 23px; letter-spacing: -.03em; }
+    .field { display: block; margin-bottom: 16px; font-size: 13px; font-weight: 600; color: var(--muted); }
+    .field input { display: block; width: 100%; height: 49px; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 12px; padding: 0 13px; margin-top: 7px; font-size: 16px; }
+    .field input:focus { outline: none; border-color: var(--accent); }
+    .error { min-height: 15px; font-size: 13px; color: var(--danger); margin: 1px 0 10px; }
+    .dialog-actions { display: flex; align-items: center; gap: 9px; justify-content: flex-end; }
+    .dialog-actions button { border: none; border-radius: 12px; min-height: 44px; padding: 0 17px; font-size: 15px; font-weight: 600; }
+    .secondary { background: var(--soft); color: var(--text); }
+    .save { background: #007aff; color: white; }
+    .remove { background: transparent; color: var(--danger); margin-right: auto; padding-left: 0 !important; }
+    .toast { position: fixed; z-index: 10; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateX(-50%); width: max-content; max-width: calc(100vw - 28px); border-radius: 13px; padding: 12px 17px; background: var(--text); color: var(--bg); font-size: 14px; box-shadow: var(--shadow); text-align: center; }
+    @media (hover: hover) { .bookmark:hover, .icon-button:not(.primary):hover { background: var(--soft); } .bookmark:hover > a { background: transparent; } }
+    @media (prefers-reduced-motion: no-preference) { .icon-button, .bookmark { transition: background .15s ease; } }
+
+    [hidden] { display: none !important; }
+    .popup { width: 184px; }
+    .pin-settings-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0 17px; border-bottom: 1px solid var(--line); font-size: 16px; font-weight: 600; }
+    .pin-switch { position: relative; display: block; flex: none; width: 53px; height: 32px; border: 0; background: var(--line); border-radius: 100px; transition: background .18s ease; }
+    .pin-switch[aria-checked="true"] { background: #34c759; }
+    .pin-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; background: #fff; border-radius: 50%; box-shadow: 0 1px 4px #0002; transition: transform .18s ease; }
+    .pin-switch[aria-checked="true"]::after { transform: translateX(21px); }
+    .pin-settings-action { width: 100%; min-height: 50px; border: 0; color: var(--text); background: transparent; text-align: left; font-size: 15px; font-weight: 560; }
+    .pin-settings-action + .pin-settings-action { border-top: 1px solid var(--line); }
+    .pin-settings-footer { display: flex; justify-content: flex-end; margin-top: 18px; }
+    .pin-settings-footer button { min-height: 43px; padding: 0 20px; border: 0; border-radius: 12px; font-weight: 650; background: var(--soft); color: var(--text); }
+    .pin-gate { position: fixed; z-index: 30; inset: 0; overflow-y: auto; overscroll-behavior: contain; background: var(--bg); touch-action: manipulation; }
+    .pin-gate-inner { min-height: 100%; width: min(100%, 395px); margin: auto; padding: max(26px, env(safe-area-inset-top)) 22px max(22px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    .pin-lock-icon { width: 53px; height: 53px; display: grid; place-items: center; margin-bottom: 16px; border-radius: 18px; color: var(--accent); background: var(--accent-tint); }
+    .pin-lock-icon svg { width: 25px; height: 25px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .pin-title { font-size: 27px; font-weight: 720; letter-spacing: -.045em; margin: 0; text-align: center; }
+    .pin-hint { color: var(--muted); min-height: 21px; font-size: 14px; text-align: center; margin: 7px 0 18px; }
+    .pin-dots { display: flex; align-items: center; justify-content: center; gap: 15px; min-height: 30px; margin-bottom: 3px; }
+    .pin-dot { width: 13px; height: 13px; border: 1.7px solid var(--muted); border-radius: 50%; }
+    .pin-dot.filled { background: var(--accent); border-color: var(--accent); }
+    .pin-feedback { min-height: 37px; padding: 10px 0 3px; margin: 0; font-size: 13px; color: var(--danger); text-align: center; }
+    .pin-keypad { width: min(100%, 285px); display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px 13px; align-items: center; justify-items: center; margin-top: 2px; }
+    .pin-key { width: 72px; height: 66px; border-radius: 22px; border: 1px solid var(--line); background: var(--surface); color: var(--text); font-size: 26px; font-weight: 450; line-height: 1; touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+    .pin-key:active { background: var(--accent-tint); }
+    .pin-key.erase { background: transparent; border-color: transparent; font-size: 23px; }
+    /* Reihenfolge ändern: dieselbe Karte, aber statt Bearbeiten ein Touch-Griff. */
+    .done-button { min-height: 45px; padding: 0 17px; border: 0; border-radius: 14px; background: var(--accent-tint); color: var(--accent); font-size: 15px; font-weight: 700; }
+    .reordering .search { display: none; }
+    .reordering .bookmark { -webkit-user-select: none; user-select: none; }
+    .bookmark-content { min-width: 0; flex: 1; display: flex; gap: 14px; align-items: center; padding: 13px 0 13px 14px; }
+    .drag-handle { flex: none; width: 55px; min-height: 76px; padding: 0; border: 0; background: transparent; color: var(--muted); display: grid; place-items: center; cursor: grab; touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+    .drag-handle svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+    .drag-placeholder { opacity: .22; border-style: dashed; }
+    .drag-ghost { position: fixed; z-index: 25; pointer-events: none; margin: 0; opacity: .96; background: var(--surface); box-shadow: var(--shadow); transform: scale(1.015); }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    .pin-countdown { font-size: 33px; font-weight: 690; letter-spacing: -.035em; margin: 15px 0 30px; font-variant-numeric: tabular-nums; }
+    .pin-cancel { min-height: 44px; margin-top: 15px; padding: 0 20px; color: var(--muted); border: 0; background: transparent; font-size: 15px; touch-action: manipulation; }
+    @media (max-height: 620px) { .pin-gate-inner { justify-content: flex-start; } .pin-lock-icon { margin-bottom: 9px; } .pin-hint { margin-bottom: 9px; } .pin-feedback { min-height: 30px; } .pin-key { height: 59px; } .pin-keypad { gap: 8px 13px; } }
+  </style>
+</head>
+<body>
+  <main id="mainApp" class="app" hidden>
+    <header>
+      <h1>Lesezeichen</h1>
+      <div class="actions">
+        <button id="menuButton" class="icon-button" type="button" aria-label="Weitere Optionen" aria-haspopup="true" aria-expanded="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>
+        </button>
+        <div id="popup" class="popup" hidden>
+          <button id="reorderButton" type="button">Reihenfolge ändern</button>
+          <button id="securityButton" type="button">PIN-Schutz</button>
+          <button id="lockButton" type="button" hidden>Jetzt sperren</button>
+          <button id="exportButton" type="button">Exportieren</button>
+          <button id="importButton" type="button">Importieren</button>
+        </div>
+        <button id="doneReorderButton" class="done-button" type="button" hidden>Fertig</button>
+        <button id="addButton" class="icon-button primary" type="button" aria-label="Lesezeichen hinzufügen">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7"/><path d="m16 16 5 5"/></svg>
+      <input id="search" type="search" placeholder="Suchen" autocomplete="off" aria-label="Lesezeichen suchen">
+    </div>
+    <ul id="list" class="bookmarks"></ul>
+    <span id="reorderAnnouncer" class="sr-only" role="status" aria-live="polite"></span>
+    <div id="empty" class="empty" hidden>
+      <span id="emptyText">Noch keine Lesezeichen</span>
+      <button id="emptyAdd" type="button">Hinzufügen</button>
+    </div>
+  </main>
+
+  <dialog id="editor" aria-labelledby="editorTitle">
+    <form id="editorForm" class="dialog-inner" novalidate>
+      <h2 id="editorTitle">Lesezeichen hinzufügen</h2>
+      <label class="field">Name<input id="nameInput" type="text" maxlength="100" autocomplete="off" required placeholder="Name"></label>
+      <label class="field">Adresse<input id="urlInput" type="url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" required placeholder="https://"></label>
+      <p id="error" class="error" role="alert"></p>
+      <div class="dialog-actions">
+        <button id="deleteButton" class="remove" type="button" hidden>Löschen</button>
+        <button id="cancelButton" class="secondary" type="button">Abbrechen</button>
+        <button class="save" type="submit">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="securityDialog" aria-labelledby="securityTitle">
+    <div class="dialog-inner">
+      <h2 id="securityTitle">PIN-Schutz</h2>
+      <div class="pin-settings-row">
+        <span>PIN-Schutz</span>
+        <button id="pinSwitch" type="button" class="pin-switch" role="switch" aria-label="PIN-Schutz aktivieren" aria-checked="false"></button>
+      </div>
+      <button id="changePinButton" class="pin-settings-action" type="button" hidden>PIN ändern</button>
+      <div class="pin-settings-footer"><button id="closeSecurityButton" type="button">Fertig</button></div>
+    </div>
+  </dialog>
+
+  <section id="pinGate" class="pin-gate" aria-labelledby="pinTitle" hidden>
+    <div class="pin-gate-inner">
+      <div class="pin-lock-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      </div>
+      <h2 id="pinTitle" class="pin-title">Entsperren</h2>
+      <p id="pinHint" class="pin-hint">6-stellige PIN eingeben</p>
+      <div id="pinDots" class="pin-dots" aria-label="0 von 6 Ziffern eingegeben">
+        <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
+        <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
+      </div>
+      <p id="pinFeedback" class="pin-feedback" role="status" aria-live="polite"></p>
+      <div id="pinCountdown" class="pin-countdown" role="timer" hidden></div>
+      <div id="pinKeypad" class="pin-keypad" aria-label="PIN-Zahlenfeld">
+        <button type="button" class="pin-key" data-digit="1">1</button>
+        <button type="button" class="pin-key" data-digit="2">2</button>
+        <button type="button" class="pin-key" data-digit="3">3</button>
+        <button type="button" class="pin-key" data-digit="4">4</button>
+        <button type="button" class="pin-key" data-digit="5">5</button>
+        <button type="button" class="pin-key" data-digit="6">6</button>
+        <button type="button" class="pin-key" data-digit="7">7</button>
+        <button type="button" class="pin-key" data-digit="8">8</button>
+        <button type="button" class="pin-key" data-digit="9">9</button>
+        <span></span>
+        <button type="button" class="pin-key" data-digit="0">0</button>
+        <button type="button" class="pin-key erase" data-erase="true" aria-label="Letzte Ziffer löschen">⌫</button>
+      </div>
+      <button id="pinCancel" type="button" class="pin-cancel" hidden>Abbrechen</button>
+    </div>
+  </section>
+  <input id="importFile" type="file" accept=".json,application/json" hidden>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script>
+    (() => {
+      'use strict';
+      const KEY = 'donni-lesezeichen-v1';
+      const PIN_KEY = 'donni-pin-v1';
+      const LOCK_MS = 60 * 60 * 1000;
+      const $ = (id) => document.getElementById(id);
+      const list = $('list');
+      const search = $('search');
+      const dialog = $('editor');
+      const form = $('editorForm');
+      const popup = $('popup');
+      const tiles = [
+        ['#e8efff','#4265c9'], ['#e3f3ee','#20846d'],
+        ['#ffecdf','#b66a31'], ['#f0e8fa','#8252aa'],
+        ['#fce7ec','#bd526f'], ['#e6f1f7','#417e9d']
+      ];
+      let bookmarks = [];
+      let editingId = null;
+      let toastTimer;
+      let storageAvailable = true;
+      let pinSettings = null;
+      let gateMode = null;
+      let pinBuffer = '';
+      let firstPin = '';
+      let pinPurpose = 'enable';
+      let gateError = '';
+      let pinBusy = false;
+      let isUnlocked = false;
+      let reorderMode = false;
+      let dragState = null;
+      let dragFrameId = null;
+
+      const makeId = () => (typeof crypto !== 'undefined' && crypto.randomUUID)
+        ? crypto.randomUUID() : String(Date.now()) + '-' + Math.random().toString(36).slice(2);
+
+      function message(value) {
+        const el = $('toast');
+        clearTimeout(toastTimer);
+        el.textContent = value;
+        el.hidden = false;
+        toastTimer = setTimeout(() => { el.hidden = true; }, 3300);
+      }
+
+      function normalizeURL(input) {
+        const raw = String(input || '').trim();
+        if (!raw) return null;
+        try {
+          const value = /^[a-z][a-z0-9+.-]*:\/\//i.test(raw) ? raw : 'https://' + raw;
+          const parsed = new URL(value);
+          if (!['https:', 'http:'].includes(parsed.protocol) || !parsed.hostname) return null;
+          return parsed.href;
+        } catch { return null; }
+      }
+
+      function host(url) {
+        try { return new URL(url).hostname.replace(/^www\./i, ''); }
+        catch { return url; }
+      }
+
+      function safeBookmark(item) {
+        if (!item || typeof item !== 'object') return null;
+        const url = normalizeURL(item.url);
+        if (!url) return null;
+        return {
+          id: typeof item.id === 'string' ? item.id : makeId(),
+          name: String(item.name || host(url)).trim().slice(0, 100) || host(url),
+          url
+        };
+      }
+
+      function load() {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(KEY) || '[]');
+          bookmarks = Array.isArray(parsed) ? parsed.map(safeBookmark).filter(Boolean) : [];
+        } catch {
+          bookmarks = [];
+          try { localStorage.setItem('__donni_test__', '1'); localStorage.removeItem('__donni_test__'); }
+          catch { storageAvailable = false; }
+        }
+        if (!storageAvailable) message('Lokale Speicherung ist in diesem Modus gesperrt.');
+      }
+
+      function persist() {
+        try {
+          localStorage.setItem(KEY, JSON.stringify(bookmarks));
+          storageAvailable = true;
+          return true;
+        } catch {
+          storageAvailable = false;
+          message('Speichern nicht möglich. Bitte die Browser-Einstellungen prüfen.');
+          return false;
+        }
+      }
+
+      function showMenu(open) {
+        popup.hidden = !open;
+        $('menuButton').setAttribute('aria-expanded', String(open));
+      }
+
+      function render() {
+        // Beim Sortieren immer ALLE Einträge zeigen, unabhängig vom Suchfilter.
+        const query = reorderMode ? '' : search.value.trim().toLocaleLowerCase('de');
+        const shown = bookmarks.filter(b => (b.name + ' ' + b.url).toLocaleLowerCase('de').includes(query));
+        list.replaceChildren();
+        const fragment = document.createDocumentFragment();
+        shown.forEach(b => {
+          const li = document.createElement('li');
+          li.className = 'bookmark';
+          li.dataset.bookmarkId = b.id;
+          const content = document.createElement(reorderMode ? 'div' : 'a');
+          if (reorderMode) {
+            content.className = 'bookmark-content';
+          } else {
+            content.href = b.url;
+            content.title = b.url;
+            content.setAttribute('aria-label', b.name + ' öffnen');
+          }
+          const glyph = document.createElement('span');
+          glyph.className = 'glyph';
+          glyph.textContent = (b.name.trim().charAt(0) || '?').toLocaleUpperCase('de');
+          const hash = [...host(b.url)].reduce((n, c) => n + c.charCodeAt(0), 0);
+          const [bg, fg] = tiles[hash % tiles.length];
+          glyph.style.setProperty('--tile-bg', bg);
+          glyph.style.setProperty('--tile-fg', fg);
+          const detail = document.createElement('span');
+          detail.className = 'bookmark-title';
+          const title = document.createElement('span');
+          title.className = 'name';
+          title.textContent = b.name;
+          const domain = document.createElement('span');
+          domain.className = 'domain';
+          domain.textContent = host(b.url);
+          detail.append(title, domain);
+          content.append(glyph, detail);
+          if (reorderMode) {
+            const handle = document.createElement('button');
+            handle.className = 'drag-handle';
+            handle.type = 'button';
+            handle.title = 'Ziehen oder mit Pfeiltasten verschieben';
+            handle.setAttribute('aria-label', b.name + ' verschieben. Ziehen oder Pfeiltasten nutzen.');
+            handle.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4v16M15 4v16" stroke-dasharray="1 4" stroke-width="3.5"/></svg>';
+            li.append(content, handle);
+          } else {
+            const edit = document.createElement('button');
+            edit.className = 'edit';
+            edit.type = 'button';
+            edit.setAttribute('aria-label', b.name + ' bearbeiten');
+            edit.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>';
+            edit.addEventListener('click', () => openEditor(b.id));
+            li.append(content, edit);
+          }
+          fragment.append(li);
+        });
+        list.append(fragment);
+        $('empty').hidden = shown.length > 0;
+        $('emptyText').textContent = bookmarks.length && query ? 'Keine Treffer' : 'Noch keine Lesezeichen';
+        $('emptyAdd').hidden = reorderMode || Boolean(bookmarks.length && query);
+      }
+
+      function setReorderMode(enabled) {
+        if (dragState) finishDrag(true);
+        reorderMode = enabled;
+        showMenu(false);
+        $('mainApp').classList.toggle('reordering', enabled);
+        $('addButton').hidden = enabled;
+        $('doneReorderButton').hidden = !enabled;
+        $('reorderButton').textContent = enabled ? 'Reihenfolge fertig' : 'Reihenfolge ändern';
+        render();
+      }
+
+      // Die Reihenfolge der DOM-Karten wird direkt im vorhandenen Array gespeichert.
+      // Dadurch bleibt das Dateiformat identisch und bestehende Lesezeichen/PINs erhalten.
+      function saveVisibleOrder() {
+        const ids = Array.from(list.children, el => el.dataset.bookmarkId);
+        if (ids.length !== bookmarks.length) return false;
+        const old = bookmarks.slice();
+        if (ids.every((id, i) => old[i].id === id)) return true;
+        const byId = new Map(old.map(b => [b.id, b]));
+        if (new Set(ids).size !== old.length || ids.some(id => !byId.has(id))) return false;
+        bookmarks = ids.map(id => byId.get(id));
+        if (!persist()) {
+          bookmarks = old;
+          render();
+          return false;
+        }
+        return true;
+      }
+
+      function placeDraggedItem(y) {
+        if (!dragState) return;
+        const item = dragState.item;
+        const siblings = Array.from(list.children).filter(el => el !== item);
+        const before = siblings.find(el => y < el.getBoundingClientRect().top + el.getBoundingClientRect().height / 2);
+        if (before) list.insertBefore(item, before);
+        else list.append(item);
+      }
+
+      function dragAnimationFrame() {
+        if (!dragState) return;
+        const y = dragState.y;
+        const edge = 86;
+        const speed = y < edge ? -Math.min(18, (edge - y) / 4)
+                    : y > innerHeight - edge ? Math.min(18, (y - (innerHeight - edge)) / 4) : 0;
+        if (speed) window.scrollBy(0, speed);
+        placeDraggedItem(y);
+        dragFrameId = requestAnimationFrame(dragAnimationFrame);
+      }
+
+      function onDragMove(event) {
+        if (!dragState || event.pointerId !== dragState.pointerId) return;
+        if (event.cancelable) event.preventDefault();
+        dragState.y = event.clientY;
+        dragState.ghost.style.top = (event.clientY - dragState.offsetY) + 'px';
+        placeDraggedItem(event.clientY);
+      }
+
+      function finishDrag(cancelled = false) {
+        if (!dragState) return;
+        const dragged = dragState;
+        dragState = null;
+        if (dragFrameId !== null) cancelAnimationFrame(dragFrameId);
+        dragFrameId = null;
+        window.removeEventListener('pointermove', onDragMove);
+        window.removeEventListener('pointerup', onDragEnd);
+        window.removeEventListener('pointercancel', onDragCancel);
+        dragged.ghost.remove();
+        dragged.item.classList.remove('drag-placeholder');
+        if (cancelled) render();
+        else if (saveVisibleOrder()) render();
+      }
+
+      function onDragEnd(event) {
+        if (dragState && event.pointerId === dragState.pointerId) finishDrag();
+      }
+
+      function onDragCancel(event) {
+        if (dragState && event.pointerId === dragState.pointerId) finishDrag(true);
+      }
+
+      function startDrag(event) {
+        if (!reorderMode || dragState || event.isPrimary === false || (event.pointerType === 'mouse' && event.button !== 0)) return;
+        const handle = event.target.closest('.drag-handle');
+        if (!handle) return;
+        const item = handle.closest('.bookmark');
+        if (!item) return;
+        if (event.cancelable) event.preventDefault();
+        const rect = item.getBoundingClientRect();
+        const ghost = item.cloneNode(true);
+        ghost.classList.add('drag-ghost');
+        ghost.setAttribute('aria-hidden', 'true');
+        ghost.querySelectorAll('button').forEach(btn => btn.tabIndex = -1);
+        ghost.style.width = rect.width + 'px';
+        ghost.style.left = rect.left + 'px';
+        ghost.style.top = rect.top + 'px';
+        document.body.appendChild(ghost);
+        item.classList.add('drag-placeholder');
+        dragState = { item, ghost, pointerId: event.pointerId, y: event.clientY, offsetY: event.clientY - rect.top };
+        window.addEventListener('pointermove', onDragMove, { passive: false });
+        window.addEventListener('pointerup', onDragEnd);
+        window.addEventListener('pointercancel', onDragCancel);
+        dragFrameId = requestAnimationFrame(dragAnimationFrame);
+      }
+
+      function keyboardReorder(event) {
+        if (!reorderMode || !event.target.closest('.drag-handle')) return;
+        const direction = event.key === 'ArrowUp' ? -1 : event.key === 'ArrowDown' ? 1 : 0;
+        if (!direction) return;
+        event.preventDefault();
+        const id = event.target.closest('.bookmark')?.dataset.bookmarkId;
+        const index = bookmarks.findIndex(b => b.id === id);
+        const nextIndex = index + direction;
+        if (index < 0 || nextIndex < 0 || nextIndex >= bookmarks.length) return;
+        const old = bookmarks.slice();
+        const [moved] = bookmarks.splice(index, 1);
+        bookmarks.splice(nextIndex, 0, moved);
+        if (!persist()) bookmarks = old;
+        render();
+        list.children[nextIndex]?.querySelector('.drag-handle')?.focus();
+        $('reorderAnnouncer').textContent = moved.name + ', Position ' + (nextIndex + 1) + ' von ' + bookmarks.length;
+      }
+
+      function openEditor(id = null) {
+        showMenu(false);
+        editingId = id;
+        const found = bookmarks.find(b => b.id === id);
+        $('editorTitle').textContent = found ? 'Lesezeichen bearbeiten' : 'Lesezeichen hinzufügen';
+        $('nameInput').value = found ? found.name : '';
+        $('urlInput').value = found ? found.url : '';
+        $('deleteButton').hidden = !found;
+        $('error').textContent = '';
+        if (typeof dialog.showModal === 'function') dialog.showModal();
+        else dialog.setAttribute('open', '');
+        setTimeout(() => $('nameInput').focus(), 80);
+      }
+
+      function closeEditor() {
+        if (typeof dialog.close === 'function') dialog.close();
+        else dialog.removeAttribute('open');
+      }
+
+      function saveEditor(event) {
+        event.preventDefault();
+        const name = $('nameInput').value.trim();
+        const url = normalizeURL($('urlInput').value);
+        if (!name) { $('error').textContent = 'Bitte einen Namen eingeben.'; $('nameInput').focus(); return; }
+        if (!url) { $('error').textContent = 'Bitte eine gültige Webadresse eingeben.'; $('urlInput').focus(); return; }
+        const previous = bookmarks.slice();
+        if (editingId && bookmarks.some(b => b.id === editingId)) {
+          bookmarks = bookmarks.map(b => b.id === editingId ? { ...b, name, url } : b);
+        } else {
+          bookmarks.unshift({ id: makeId(), name, url });
+        }
+        if (!persist()) { bookmarks = previous; return; }
+        closeEditor();
+        render();
+      }
+
+      function removeEditor() {
+        const b = bookmarks.find(item => item.id === editingId);
+        if (!b) return;
+        if (!confirm('„' + b.name + '“ löschen?')) return;
+        const previous = bookmarks.slice();
+        bookmarks = bookmarks.filter(item => item.id !== editingId);
+        if (!persist()) { bookmarks = previous; return; }
+        closeEditor();
+        render();
+      }
+
+      function exportBookmarks() {
+        showMenu(false);
+        const output = JSON.stringify({ version: 1, bookmarks: bookmarks.map(({ name, url }) => ({ name, url })) }, null, 2);
+        const blob = new Blob([output], { type: 'application/json' });
+        const objectURL = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = objectURL;
+        a.download = 'lesezeichen-backup.json';
+        document.body.append(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(objectURL), 30000);
+      }
+
+      async function importBookmarks(event) {
+        const file = event.target.files?.[0];
+        event.target.value = '';
+        if (!file) return;
+        try {
+          const parsed = JSON.parse(await file.text());
+          const input = Array.isArray(parsed) ? parsed : parsed.bookmarks;
+          if (!Array.isArray(input)) throw new Error('format');
+          const entries = input.map(safeBookmark).filter(Boolean);
+          if (input.length && !entries.length) throw new Error('format');
+          const existingURLs = new Set(bookmarks.map(b => b.url));
+          const fresh = [];
+          for (const b of entries) {
+            if (!existingURLs.has(b.url)) { existingURLs.add(b.url); fresh.push({ ...b, id: makeId() }); }
+          }
+          const previous = bookmarks.slice();
+          bookmarks = [...fresh, ...bookmarks];
+          if (!persist()) { bookmarks = previous; return; }
+          render();
+          message(fresh.length ? fresh.length + ' Lesezeichen importiert' : 'Keine neuen Lesezeichen');
+        } catch { message('Datei konnte nicht importiert werden.'); }
+      }
+
+
+      // Die PIN schützt die Bedienoberfläche, verschlüsselt aber keine Lesezeichen.
+      // SHA-256 ist hier direkt implementiert, damit die Datei auch offline unter file:// läuft.
+      function sha256Ascii(value) {
+        const constants = [
+          0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+          0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+          0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+          0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+          0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+          0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+          0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+          0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2
+        ];
+        const rotr = (x, n) => (x >>> n) | (x << (32 - n));
+        const words = [];
+        const n = value.length;
+        for (let i = 0; i < n; i++) {
+          const index = i >> 2;
+          words[index] = (words[index] || 0) | (value.charCodeAt(i) << (24 - (i % 4) * 8));
+        }
+        const finalIndex = n >> 2;
+        words[finalIndex] = (words[finalIndex] || 0) | (0x80 << (24 - (n % 4) * 8));
+        words[(((n + 8) >> 6) << 4) + 15] = n * 8;
+        const H = [0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+        for (let offset = 0; offset < words.length; offset += 16) {
+          const w = new Array(64);
+          for (let t = 0; t < 16; t++) w[t] = words[offset + t] || 0;
+          for (let t = 16; t < 64; t++) {
+            const s0 = rotr(w[t-15],7) ^ rotr(w[t-15],18) ^ (w[t-15] >>> 3);
+            const s1 = rotr(w[t-2],17) ^ rotr(w[t-2],19) ^ (w[t-2] >>> 10);
+            w[t] = (w[t-16] + s0 + w[t-7] + s1) | 0;
+          }
+          let [a,b,c,d,e,f,g,h] = H;
+          for (let t = 0; t < 64; t++) {
+            const s1 = rotr(e,6) ^ rotr(e,11) ^ rotr(e,25);
+            const choice = (e & f) ^ (~e & g);
+            const temp1 = (h + s1 + choice + constants[t] + w[t]) | 0;
+            const s0 = rotr(a,2) ^ rotr(a,13) ^ rotr(a,22);
+            const majority = (a & b) ^ (a & c) ^ (b & c);
+            const temp2 = (s0 + majority) | 0;
+            h=g; g=f; f=e; e=(d+temp1)|0; d=c; c=b; b=a; a=(temp1+temp2)|0;
+          }
+          const results = [a,b,c,d,e,f,g,h];
+          for (let t = 0; t < 8; t++) H[t] = (H[t] + results[t]) | 0;
+        }
+        return H.map(v => (v >>> 0).toString(16).padStart(8, '0')).join('');
+      }
+
+      function hashPin(pin, salt) {
+        let hashed = sha256Ascii(salt + ':' + pin);
+        for (let i = 0; i < 2048; i++) hashed = sha256Ascii(hashed + salt);
+        return hashed;
+      }
+
+      function createSalt() {
+        const bytes = new Uint8Array(16);
+        if (typeof crypto !== 'undefined' && crypto.getRandomValues) crypto.getRandomValues(bytes);
+        else for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
+        return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+      }
+
+      function readPinSettings() {
+        try {
+          const item = JSON.parse(localStorage.getItem(PIN_KEY) || 'null');
+          if (item && item.version === 1 && /^[a-f0-9]{32}$/.test(item.salt) && /^[a-f0-9]{64}$/.test(item.hash)) {
+            item.attempts = Math.max(0, Math.min(2, Number(item.attempts) || 0));
+            item.lockUntil = Math.max(0, Number(item.lockUntil) || 0);
+            return item;
+          }
+        } catch { /* Storage nicht verfügbar */ }
+        return null;
+      }
+
+      function writePinSettings(next) {
+        try {
+          if (next) localStorage.setItem(PIN_KEY, JSON.stringify(next));
+          else localStorage.removeItem(PIN_KEY);
+          pinSettings = next;
+          return true;
+        } catch {
+          message('PIN-Schutz konnte nicht gespeichert werden.');
+          return false;
+        }
+      }
+
+      function refreshSecurityMenu() {
+        $('lockButton').hidden = !pinSettings;
+        $('changePinButton').hidden = !pinSettings;
+        $('pinSwitch').setAttribute('aria-checked', String(Boolean(pinSettings)));
+        $('pinSwitch').setAttribute('aria-label', pinSettings ? 'PIN-Schutz ausschalten' : 'PIN-Schutz einschalten');
+      }
+
+      function openSecurity() {
+        showMenu(false);
+        refreshSecurityMenu();
+        const modal = $('securityDialog');
+        if (typeof modal.showModal === 'function') modal.showModal();
+        else modal.setAttribute('open', '');
+      }
+
+      function closeSecurity() {
+        const modal = $('securityDialog');
+        if (typeof modal.close === 'function') modal.close();
+        else modal.removeAttribute('open');
+      }
+
+      function isVerificationMode() {
+        return ['unlock', 'verify-disable', 'verify-change'].includes(gateMode);
+      }
+
+      function isTimedOut() {
+        return Boolean(pinSettings && isVerificationMode() && Date.now() < pinSettings.lockUntil);
+      }
+
+      function renderGate() {
+        if (!gateMode) return;
+        let title = 'Entsperren';
+        let hint = '6-stellige PIN eingeben';
+        if (gateMode === 'create') { title = 'PIN festlegen'; hint = 'Neue 6-stellige PIN'; }
+        if (gateMode === 'confirm') { title = 'PIN bestätigen'; hint = 'PIN erneut eingeben'; }
+        if (gateMode === 'verify-disable') { title = 'PIN-Schutz ausschalten'; hint = 'Aktuelle PIN eingeben'; }
+        if (gateMode === 'verify-change') { title = 'PIN ändern'; hint = 'Aktuelle PIN eingeben'; }
+        const locked = isTimedOut();
+        if (locked) { title = 'Gesperrt'; hint = 'Erneut versuchen in'; }
+        $('pinTitle').textContent = title;
+        $('pinHint').textContent = hint;
+        $('pinKeypad').hidden = locked;
+        $('pinDots').hidden = locked;
+        $('pinCountdown').hidden = !locked;
+        $('pinCancel').hidden = gateMode === 'unlock';
+        if (locked) {
+          const seconds = Math.ceil((pinSettings.lockUntil - Date.now()) / 1000);
+          const hh = String(Math.floor(seconds / 3600)).padStart(2, '0');
+          const mm = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+          const ss = String(seconds % 60).padStart(2, '0');
+          $('pinCountdown').textContent = hh + ':' + mm + ':' + ss;
+        }
+        $('pinFeedback').textContent = locked ? '' : gateError;
+        $('pinDots').setAttribute('aria-label', pinBuffer.length + ' von 6 Ziffern eingegeben');
+        [...$('pinDots').children].forEach((dot, index) => dot.classList.toggle('filled', index < pinBuffer.length));
+      }
+
+      function openGate(mode) {
+        closeSecurity();
+        showMenu(false);
+        gateMode = mode;
+        pinBuffer = '';
+        firstPin = '';
+        gateError = '';
+        pinBusy = false;
+        $('mainApp').hidden = true;
+        $('pinGate').hidden = false;
+        renderGate();
+      }
+
+      function closeGate() {
+        gateMode = null;
+        pinBuffer = '';
+        firstPin = '';
+        gateError = '';
+        pinBusy = false;
+        $('pinGate').hidden = true;
+        $('mainApp').hidden = false;
+        refreshSecurityMenu();
+      }
+
+      function keyPress(value) {
+        if (!gateMode || isTimedOut() || pinBusy) return;
+        if (value === 'erase') {
+          pinBuffer = pinBuffer.slice(0, -1);
+          gateError = '';
+          renderGate();
+          return;
+        }
+        if (!/^[0-9]$/.test(value) || pinBuffer.length >= 6) return;
+        pinBuffer += value;
+        gateError = '';
+        renderGate();
+        if (pinBuffer.length === 6) {
+          pinBusy = true;
+          setTimeout(completePin, 130);
+        }
+      }
+
+      function wrongPin() {
+        const tries = (pinSettings.attempts || 0) + 1;
+        const next = { ...pinSettings };
+        if (tries >= 3) {
+          next.attempts = 0;
+          next.lockUntil = Date.now() + LOCK_MS;
+          gateError = '';
+          gateMode = 'unlock';
+          isUnlocked = false;
+        } else {
+          next.attempts = tries;
+          gateError = 'Falsche PIN · Noch ' + (3 - tries) + (tries === 2 ? ' Versuch' : ' Versuche');
+        }
+        // In der aktuellen Sitzung auch dann sperren, falls ein späterer Speicherversuch fehlschlägt.
+        pinSettings = next;
+        writePinSettings(next);
+        pinBuffer = '';
+        pinBusy = false;
+        renderGate();
+      }
+
+      function completePin() {
+        if (!gateMode || pinBuffer.length !== 6) { pinBusy = false; return; }
+        const pin = pinBuffer;
+        pinBuffer = '';
+        if (gateMode === 'create') {
+          firstPin = pin;
+          gateMode = 'confirm';
+          pinBusy = false;
+          renderGate();
+          return;
+        }
+        if (gateMode === 'confirm') {
+          if (pin !== firstPin) {
+            firstPin = '';
+            gateMode = 'create';
+            gateError = 'PINs stimmen nicht überein';
+            pinBusy = false;
+            renderGate();
+            return;
+          }
+          const salt = createSalt();
+          const next = { version: 1, salt, hash: hashPin(pin, salt), attempts: 0, lockUntil: 0 };
+          if (writePinSettings(next)) {
+            isUnlocked = true;
+            closeGate();
+            message(pinPurpose === 'change' ? 'PIN geändert' : 'PIN-Schutz aktiviert');
+          } else {
+            pinBusy = false;
+            gateError = 'Speichern nicht möglich';
+            gateMode = 'create';
+            firstPin = '';
+            renderGate();
+          }
+          return;
+        }
+        if (!pinSettings || isTimedOut()) { pinBusy = false; renderGate(); return; }
+        if (hashPin(pin, pinSettings.salt) !== pinSettings.hash) { wrongPin(); return; }
+        writePinSettings({ ...pinSettings, attempts: 0, lockUntil: 0 });
+        pinBusy = false;
+        if (gateMode === 'verify-disable') {
+          if (writePinSettings(null)) { closeGate(); message('PIN-Schutz deaktiviert'); }
+          else { gateError = 'Deaktivieren fehlgeschlagen'; renderGate(); }
+        } else if (gateMode === 'verify-change') {
+          pinPurpose = 'change';
+          gateMode = 'create';
+          renderGate();
+        } else {
+          isUnlocked = true;
+          closeGate();
+          render();
+        }
+      }
+
+      function tickPinLock() {
+        if (!gateMode || !pinSettings || !isVerificationMode()) return;
+        if (pinSettings.lockUntil && Date.now() >= pinSettings.lockUntil) {
+          writePinSettings({ ...pinSettings, attempts: 0, lockUntil: 0 });
+          gateError = '';
+        }
+        renderGate();
+      }
+
+      function lockApp() {
+        if (pinSettings && gateMode === null) {
+          if (dragState) finishDrag(true);
+          isUnlocked = false;
+          showMenu(false);
+          if (dialog.open) closeEditor();
+          openGate('unlock');
+        }
+      }
+
+      $('reorderButton').addEventListener('click', () => setReorderMode(!reorderMode));
+      $('doneReorderButton').addEventListener('click', () => setReorderMode(false));
+      list.addEventListener('pointerdown', startDrag);
+      list.addEventListener('keydown', keyboardReorder);
+      $('addButton').addEventListener('click', () => openEditor());
+      $('emptyAdd').addEventListener('click', () => openEditor());
+      $('menuButton').addEventListener('click', (event) => { event.stopPropagation(); showMenu(popup.hidden); });
+      document.addEventListener('click', (event) => { if (!popup.contains(event.target) && !$('menuButton').contains(event.target)) showMenu(false); });
+      document.addEventListener('keydown', (event) => { if (event.key === 'Escape') showMenu(false); });
+      $('cancelButton').addEventListener('click', closeEditor);
+      $('deleteButton').addEventListener('click', removeEditor);
+      form.addEventListener('submit', saveEditor);
+      search.addEventListener('input', render);
+      $('exportButton').addEventListener('click', exportBookmarks);
+      $('importButton').addEventListener('click', () => { showMenu(false); $('importFile').click(); });
+      $('importFile').addEventListener('change', importBookmarks);
+      dialog.addEventListener('click', (event) => { if (event.target === dialog) closeEditor(); });
+      $('securityButton').addEventListener('click', openSecurity);
+      $('closeSecurityButton').addEventListener('click', closeSecurity);
+      $('securityDialog').addEventListener('click', (event) => { if (event.target === $('securityDialog')) closeSecurity(); });
+      $('pinSwitch').addEventListener('click', () => {
+        if (pinSettings) openGate('verify-disable');
+        else { pinPurpose = 'enable'; openGate('create'); }
+      });
+      $('changePinButton').addEventListener('click', () => { if (pinSettings) openGate('verify-change'); });
+      $('lockButton').addEventListener('click', lockApp);
+      $('pinKeypad').addEventListener('click', (event) => {
+        const key = event.target.closest('button');
+        if (key?.dataset.digit !== undefined) keyPress(key.dataset.digit);
+        else if (key?.dataset.erase) keyPress('erase');
+      });
+      $('pinCancel').addEventListener('click', () => { if (gateMode !== 'unlock') closeGate(); });
+      document.addEventListener('keydown', (event) => {
+        if (!gateMode) return;
+        if (/^[0-9]$/.test(event.key)) { event.preventDefault(); keyPress(event.key); }
+        else if (event.key === 'Backspace') { event.preventDefault(); keyPress('erase'); }
+        else if (event.key === 'Escape' && gateMode !== 'unlock') { event.preventDefault(); closeGate(); }
+      });
+      document.addEventListener('visibilitychange', () => { if (document.hidden) lockApp(); });
+      window.addEventListener('pagehide', lockApp);
+      window.addEventListener('pageshow', () => { if (pinSettings && !isUnlocked && !gateMode) openGate('unlock'); });
+      setInterval(tickPinLock, 1000);
+      pinSettings = readPinSettings();
+      load();
+      refreshSecurityMenu();
+      if (pinSettings) openGate('unlock');
+      else { isUnlocked = true; $('mainApp').hidden = false; render(); }
+    })();
+  </script>
+</body>
+</html>
