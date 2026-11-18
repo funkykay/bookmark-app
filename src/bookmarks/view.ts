@@ -105,9 +105,13 @@ export function initBookmarks({ store, pin }: Options): View {
       return;
     }
 
+    const now = new Date().toISOString();
     const next = editingId
-      ? store.items.map((bookmark) => bookmark.id === editingId ? { ...bookmark, name, url } : bookmark)
-      : [{ id: createId(), name, url }, ...store.items];
+      ? store.items.map((bookmark) => {
+        if (bookmark.id !== editingId || (bookmark.name === name && bookmark.url === url)) return bookmark;
+        return { ...bookmark, name, url, updated: now };
+      })
+      : [{ id: createId(), name, url, creation: now, updated: now }, ...store.items];
     if (store.save(next)) editor.close();
   }
 

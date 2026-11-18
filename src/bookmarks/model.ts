@@ -2,6 +2,8 @@ export interface Bookmark {
   id: string;
   name: string;
   url: string;
+  creation: string;
+  updated: string;
 }
 
 const storageKey = 'donni-lesezeichen-v1';
@@ -27,15 +29,23 @@ export function hostname(url: string): string {
   return new URL(url).hostname.replace(/^www\./i, '');
 }
 
+function isTimestamp(value: unknown): value is string {
+  if (typeof value !== 'string') return false;
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) && date.toISOString() === value;
+}
+
 function parseEntry(input: unknown): Bookmark | null {
   if (typeof input !== 'object' || input === null || !('url' in input) || typeof input.url !== 'string') return null;
+  if (!('creation' in input) || !isTimestamp(input.creation)) return null;
+  if (!('updated' in input) || !isTimestamp(input.updated)) return null;
 
   const url = normalizeUrl(input.url);
   if (!url) return null;
 
   const name = 'name' in input && typeof input.name === 'string' ? input.name.trim().slice(0, maxNameLength) : '';
   const id = 'id' in input && typeof input.id === 'string' && input.id ? input.id : createId();
-  return { id, name: name || hostname(url), url };
+  return { id, name: name || hostname(url), url, creation: input.creation, updated: input.updated };
 }
 
 function parseEntries(input: unknown[]): Bookmark[] {
