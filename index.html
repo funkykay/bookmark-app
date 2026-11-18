@@ -20,8 +20,6 @@
           <button id="reorderButton" type="button">Reihenfolge ändern</button>
           <button id="settingsButton" type="button">Einstellungen</button>
           <button id="lockButton" type="button" hidden>Jetzt sperren</button>
-          <button id="exportButton" type="button">Exportieren</button>
-          <button id="importButton" type="button">Importieren</button>
         </div>
         <button id="addButton" class="icon-button primary" type="button" aria-label="Lesezeichen hinzufügen">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
@@ -76,7 +74,14 @@
         <button id="pinSwitch" type="button" class="pin-switch" role="switch" aria-label="PIN-Schutz" aria-checked="false"></button>
       </div>
       <p id="pinUnavailable" class="pin-unavailable" hidden>Für den PIN-Schutz ist HTTPS oder localhost erforderlich.</p>
-      <button id="changePinButton" class="pin-settings-action" type="button" hidden>PIN ändern</button>
+      <button id="changePinButton" class="settings-action" type="button" hidden>PIN ändern</button>
+    </section>
+    <section class="settings-group" aria-labelledby="dataTitle">
+      <h2 id="dataTitle">Daten</h2>
+      <button id="importButton" class="settings-action" type="button">Lesezeichen importieren</button>
+      <input id="importFile" type="file" accept=".json,application/json" hidden>
+      <button id="exportButton" class="settings-action" type="button">Lesezeichen exportieren</button>
+      <button id="purgeButton" class="settings-action danger" type="button">Alle Daten löschen</button>
     </section>
   </main>
 
@@ -110,7 +115,6 @@
       <button id="pinCancel" type="button" class="pin-cancel" hidden>Abbrechen</button>
     </div>
   </main>
-  <input id="importFile" type="file" accept=".json,application/json" hidden>
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
   <script type="module" src="/src/main.ts"></script>

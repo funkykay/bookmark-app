@@ -21,9 +21,9 @@ const pin = initPin({
   returnFromPin() { navigation.show(previousView); },
 });
 
-const settings = initSettings(pin);
+const settings = initSettings({ store, pin, notify });
 const navigation = createNavigation({
-  bookmarks: initBookmarks({ store, pin, notify }),
+  bookmarks: initBookmarks({ store, pin }),
   reorder: initReorder(store),
   settings,
   pin: pin.view,

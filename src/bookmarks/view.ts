@@ -2,17 +2,16 @@ import { element } from '../dom';
 import type { View } from '../views';
 import type { PinControls } from '../pin/view';
 import { createBookmarkCard } from './card';
-import { createId, maxNameLength, normalizeUrl, parseImport } from './model';
+import { createId, maxNameLength, normalizeUrl } from './model';
 import type { Bookmark } from './model';
 import type { BookmarkStore } from './store';
 
 interface Options {
   store: BookmarkStore;
   pin: Pick<PinControls, 'enabled' | 'lock'>;
-  notify: (message: string) => void;
 }
 
-export function initBookmarks({ store, pin, notify }: Options): View {
+export function initBookmarks({ store, pin }: Options): View {
   const list = element('list', 'ul');
   const search = element('search', 'input');
   const editor = element('editor', 'dialog');
@@ -25,7 +24,6 @@ export function initBookmarks({ store, pin, notify }: Options): View {
   const empty = element('empty', 'div');
   const emptyText = element('emptyText', 'span');
   const emptyAdd = element('emptyAdd', 'button');
-  const importFile = element('importFile', 'input');
 
   const lockButton = element('lockButton', 'button');
   const menu = element('popup', 'div');
@@ -118,45 +116,6 @@ export function initBookmarks({ store, pin, notify }: Options): View {
     if (store.save(store.items.filter(({ id }) => id !== bookmark.id))) editor.close();
   }
 
-  function exportBookmarks(): void {
-    closeMenu();
-    const output = JSON.stringify({ bookmarks: store.items.map(({ name, url }) => ({ name, url })) }, null, 2);
-    const objectUrl = URL.createObjectURL(new Blob([output], { type: 'application/json' }));
-    const link = document.createElement('a');
-    link.href = objectUrl;
-    link.download = 'lesezeichen-backup.json';
-    document.body.append(link);
-    link.click();
-    link.remove();
-    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 30_000);
-  }
-
-  async function importBookmarks(): Promise<void> {
-    const file = importFile.files?.[0];
-    importFile.value = '';
-    if (!file) return;
-
-    let entries: Bookmark[];
-    try {
-      entries = parseImport(await file.text());
-    } catch {
-      notify('Datei konnte nicht importiert werden.');
-      return;
-    }
-    const urls = new Set(store.items.map(({ url }) => url));
-    const fresh: Bookmark[] = [];
-    for (const entry of entries) {
-      if (urls.has(entry.url)) continue;
-      urls.add(entry.url);
-      fresh.push({ ...entry, id: createId() });
-    }
-    if (!fresh.length) {
-      notify('Keine neuen Lesezeichen');
-      return;
-    }
-    if (store.save([...fresh, ...store.items])) notify(`${fresh.length} Lesezeichen importiert`);
-  }
-
   lockButton.addEventListener('click', pin.lock);
   element('editorForm', 'form').addEventListener('submit', saveEditor);
   element('cancelButton', 'button').addEventListener('click', () => editor.close());
@@ -165,9 +124,6 @@ export function initBookmarks({ store, pin, notify }: Options): View {
   addButton.addEventListener('click', () => openEditor());
   emptyAdd.addEventListener('click', () => openEditor());
   search.addEventListener('input', render);
-  element('exportButton', 'button').addEventListener('click', exportBookmarks);
-  element('importButton', 'button').addEventListener('click', () => { closeMenu(); importFile.click(); });
-  importFile.addEventListener('change', () => { void importBookmarks(); });
 
   return {
     root: element('bookmarksView', 'main'),

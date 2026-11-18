@@ -63,7 +63,8 @@ export function loadBookmarks(): Bookmark[] {
 }
 
 export function saveBookmarks(bookmarks: readonly Bookmark[]): void {
-  localStorage.setItem(storageKey, JSON.stringify(bookmarks));
+  if (bookmarks.length) localStorage.setItem(storageKey, JSON.stringify(bookmarks));
+  else localStorage.removeItem(storageKey);
 }
 
 export function parseImport(text: string): Bookmark[] {

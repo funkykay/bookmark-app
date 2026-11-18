@@ -211,6 +211,7 @@ export function initPin({ notify, showPin, returnFromPin }: Options) {
     view,
     get enabled() { return Boolean(settings); },
     lock: lockApp,
+    clearSettings() { return persist(null); },
     toggleProtection() {
       if (settings) openGate({ mode: 'verify-disable' });
       else openGate({ mode: 'create', purpose: 'enable' });
