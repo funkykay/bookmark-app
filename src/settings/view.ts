@@ -1,5 +1,5 @@
 import { messages } from '../i18n';
-import { createId, parseImport } from '../bookmarks/model';
+import { parseBookmarks, serializeBookmarks } from '../bookmarks/model';
 import type { Bookmark } from '../bookmarks/model';
 import type { BookmarkStore } from '../bookmarks/store';
 import { element } from '../dom';
@@ -23,8 +23,7 @@ export function initSettings({ store, pin, notify, clearLanguage }: Options): Vi
   let purgeVersion = 0;
 
   function exportBookmarks(): void {
-    const bookmarks = store.items.map(({ name, url, creation, updated }) => ({ name, url, creation, updated }));
-    const output = JSON.stringify({ bookmarks }, null, 2);
+    const output = serializeBookmarks(store.items);
     const objectUrl = URL.createObjectURL(new Blob([output], { type: 'application/json' }));
     const link = document.createElement('a');
     link.href = objectUrl;
@@ -43,19 +42,14 @@ export function initSettings({ store, pin, notify, clearLanguage }: Options): Vi
     const version = purgeVersion;
     let entries: Bookmark[];
     try {
-      entries = parseImport(await file.text());
+      entries = parseBookmarks(await file.text());
     } catch {
       notify(messages().importFailed);
       return;
     }
     if (version !== purgeVersion) return;
-    const urls = new Set(store.items.map(({ url }) => url));
-    const fresh: Bookmark[] = [];
-    for (const entry of entries) {
-      if (urls.has(entry.url)) continue;
-      urls.add(entry.url);
-      fresh.push({ ...entry, id: createId() });
-    }
+    const knownIds = new Set(store.items.map(({ id }) => id));
+    const fresh = entries.filter(({ id }) => !knownIds.has(id));
     if (!fresh.length) {
       notify(messages().noNewBookmarks);
       return;
@@ -66,7 +60,7 @@ export function initSettings({ store, pin, notify, clearLanguage }: Options): Vi
   function purgeData(): void {
     if (!window.confirm(messages().confirmPurge)) return;
     purgeVersion++;
-    if (!store.save([]) || !pin.clearSettings() || !clearAppearance() || !clearLanguage()) return;
+    if (!store.clear() || !pin.clearSettings() || !clearAppearance() || !clearLanguage()) return;
     render();
     notify(messages().purged);
   }

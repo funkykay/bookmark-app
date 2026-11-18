@@ -1,28 +1,44 @@
 import { messages } from '../i18n';
-import { loadBookmarks, saveBookmarks } from './model';
+import { parseBookmarks, serializeBookmarks } from './model';
 import type { Bookmark } from './model';
+
+const storageKey = 'donni-bookmark-lesezeichen';
 
 export function createBookmarkStore(notify: (message: string) => void, onChange: () => void) {
   let items: Bookmark[] = [];
+  let loadFailed = false;
   try {
-    items = loadBookmarks();
+    const stored = localStorage.getItem(storageKey);
+    if (stored !== null) items = parseBookmarks(stored);
   } catch {
-    notify(messages().storageBlocked);
+    loadFailed = true;
+    notify(messages().loadFailed);
+  }
+
+  function persist(next: Bookmark[]): boolean {
+    try {
+      if (next.length) localStorage.setItem(storageKey, serializeBookmarks(next));
+      else localStorage.removeItem(storageKey);
+    } catch {
+      notify(messages().saveFailed);
+      return false;
+    }
+    items = next;
+    loadFailed = false;
+    onChange();
+    return true;
   }
 
   return {
     get items(): readonly Bookmark[] { return items; },
     save(next: Bookmark[]): boolean {
-      try {
-        saveBookmarks(next);
-      } catch {
-        notify(messages().saveFailed);
+      if (loadFailed) {
+        notify(messages().loadFailed);
         return false;
       }
-      items = next;
-      onChange();
-      return true;
+      return persist(next);
     },
+    clear() { return persist([]); },
   };
 }
 

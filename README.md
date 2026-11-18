@@ -15,6 +15,10 @@ Eine kleine Web-App, mit der du deine Lieblingslinks direkt im Browser sammeln u
 
 Die App speichert deine Lesezeichen und PIN-Einstellungen im Browser (`localStorage`). Zum Übertragen deiner Lesezeichen auf ein anderes Gerät oder an einen anderen Speicherort verwende den JSON-Export und -Import. Auch mit aktivierter PIN bleiben die gespeicherten Lesezeichen im Klartext.
 
+Browser-Speicher und JSON-Export verwenden für Lesezeichen dasselbe Format (Version 2). Ein Backup enthält die Einträge in Listenreihenfolge mit ID, Name, URL sowie Erstellungs- und Änderungszeit. Der Import stellt diese Reihenfolge in einer leeren Liste wieder her. In einer bestehenden Liste fügt er neue IDs vorne ein und behält für bekannte IDs die lokale Fassung bei. Mehrere Lesezeichen dürfen dieselbe URL haben. Bei einer ungültigen Datei oder mehrfach vergebenen ID wird der gesamte Import abgebrochen.
+
+Mit diesem Konzeptstand beginnen die Lesezeichenliste und der PIN-Schutz in eigenen neuen Speichereinträgen. Wer eine PIN verwenden möchte, richtet sie für diese Version neu ein.
+
 ## Entwicklung
 
 Vorausgesetzt wird Node.js 20 ab 20.19 oder Node.js ab 22.12.
