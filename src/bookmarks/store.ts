@@ -2,7 +2,7 @@ import { messages } from '../i18n';
 import { parseBookmarks, serializeBookmarks } from './model';
 import type { Bookmark } from './model';
 
-const storageKey = 'donni-lesezeichen-v2';
+const storageKey = 'donni-bookmark-lesezeichen';
 
 export function createBookmarkStore(notify: (message: string) => void, onChange: () => void) {
   let items: Bookmark[] = [];

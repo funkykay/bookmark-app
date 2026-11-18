@@ -1,7 +1,7 @@
 import { element } from '../dom';
 import { applyLanguage, isLanguage, languageForLocale, messages } from '../i18n';
 
-const storageKey = 'donni-language-v1';
+const storageKey = 'donni-bookmark-language';
 
 export function initLanguage(notify: (message: string) => void) {
   const select = element('languageSelect', 'select');

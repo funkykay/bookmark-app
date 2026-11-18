@@ -5,7 +5,7 @@ export interface PinSettings {
   lockUntil: number;
 }
 
-const storageKey = 'donni-pin-v2';
+const storageKey = 'donni-bookmark-pin';
 const iterations = 600_000;
 
 function toHex(bytes: Uint8Array): string {

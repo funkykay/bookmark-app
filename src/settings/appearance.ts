@@ -1,7 +1,7 @@
 import { messages } from '../i18n';
 import { element } from '../dom';
 
-const storageKey = 'donni-darstellung-v1';
+const storageKey = 'donni-bookmark-darstellung';
 
 export function initAppearance(notify: (message: string) => void) {
   const form = element('appearanceForm', 'form');
