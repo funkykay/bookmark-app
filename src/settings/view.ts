@@ -23,7 +23,8 @@ export function initSettings({ store, pin, notify, clearLanguage }: Options): Vi
   let purgeVersion = 0;
 
   function exportBookmarks(): void {
-    const output = JSON.stringify({ bookmarks: store.items.map(({ name, url }) => ({ name, url })) }, null, 2);
+    const bookmarks = store.items.map(({ name, url, creation, updated }) => ({ name, url, creation, updated }));
+    const output = JSON.stringify({ bookmarks }, null, 2);
     const objectUrl = URL.createObjectURL(new Blob([output], { type: 'application/json' }));
     const link = document.createElement('a');
     link.href = objectUrl;
