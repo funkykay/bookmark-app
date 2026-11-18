@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#f7f8fa" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#101114" media="(prefers-color-scheme: dark)">
+  <title>Lesezeichen</title>
+</head>
+<body>
+  <main id="mainApp" class="app" hidden>
+    <header>
+      <h1>Lesezeichen</h1>
+      <div class="actions">
+        <button id="menuButton" class="icon-button" type="button" aria-label="Weitere Optionen" aria-controls="popup" aria-expanded="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>
+        </button>
+        <div id="popup" class="popup" hidden>
+          <button id="reorderButton" type="button">Reihenfolge ändern</button>
+          <button id="securityButton" type="button">PIN-Schutz</button>
+          <button id="lockButton" type="button" hidden>Jetzt sperren</button>
+          <button id="exportButton" type="button">Exportieren</button>
+          <button id="importButton" type="button">Importieren</button>
+        </div>
+        <button id="doneReorderButton" class="done-button" type="button" hidden>Fertig</button>
+        <button id="addButton" class="icon-button primary" type="button" aria-label="Lesezeichen hinzufügen">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div id="searchBar" class="search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7"/><path d="m16 16 5 5"/></svg>
+      <input id="search" type="search" placeholder="Suchen" autocomplete="off" aria-label="Lesezeichen suchen">
+    </div>
+    <ul id="list" class="bookmarks" role="list"></ul>
+    <span id="reorderAnnouncer" class="sr-only" role="status" aria-live="polite"></span>
+    <div id="empty" class="empty" hidden>
+      <span id="emptyText">Noch keine Lesezeichen</span>
+      <button id="emptyAdd" type="button">Hinzufügen</button>
+    </div>
+  </main>
+
+  <dialog id="editor" aria-labelledby="editorTitle">
+    <form id="editorForm" class="dialog-inner" novalidate>
+      <h2 id="editorTitle">Lesezeichen hinzufügen</h2>
+      <label class="field">Name<input id="nameInput" type="text" maxlength="100" autocomplete="off" required placeholder="Name"></label>
+      <label class="field">Adresse<input id="urlInput" type="url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" required placeholder="https://"></label>
+      <p id="error" class="error" role="alert"></p>
+      <div class="dialog-actions">
+        <button id="deleteButton" class="remove" type="button" hidden>Löschen</button>
+        <button id="cancelButton" class="secondary" type="button">Abbrechen</button>
+        <button class="save" type="submit">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="securityDialog" aria-labelledby="securityTitle">
+    <div class="dialog-inner">
+      <h2 id="securityTitle">PIN-Schutz</h2>
+      <div class="pin-settings-row">
+        <span>PIN-Schutz</span>
+        <button id="pinSwitch" type="button" class="pin-switch" role="switch" aria-label="PIN-Schutz" aria-checked="false"></button>
+      </div>
+      <p id="pinUnavailable" class="pin-unavailable" hidden>Für den PIN-Schutz ist HTTPS oder localhost erforderlich.</p>
+      <button id="changePinButton" class="pin-settings-action" type="button" hidden>PIN ändern</button>
+      <div class="pin-settings-footer"><button id="closeSecurityButton" type="button">Fertig</button></div>
+    </div>
+  </dialog>
+
+  <section id="pinGate" class="pin-gate" aria-labelledby="pinTitle" hidden>
+    <div class="pin-gate-inner">
+      <div class="pin-lock-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      </div>
+      <h2 id="pinTitle" class="pin-title" tabindex="-1">Entsperren</h2>
+      <p id="pinHint" class="pin-hint">6-stellige PIN eingeben</p>
+      <div id="pinDots" class="pin-dots" aria-label="0 von 6 Ziffern eingegeben">
+        <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
+        <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
+      </div>
+      <p id="pinFeedback" class="pin-feedback" role="status" aria-live="polite"></p>
+      <div id="pinCountdown" class="pin-countdown" role="timer" hidden></div>
+      <div id="pinKeypad" class="pin-keypad" aria-label="PIN-Zahlenfeld">
+        <button type="button" class="pin-key" data-digit="1">1</button>
+        <button type="button" class="pin-key" data-digit="2">2</button>
+        <button type="button" class="pin-key" data-digit="3">3</button>
+        <button type="button" class="pin-key" data-digit="4">4</button>
+        <button type="button" class="pin-key" data-digit="5">5</button>
+        <button type="button" class="pin-key" data-digit="6">6</button>
+        <button type="button" class="pin-key" data-digit="7">7</button>
+        <button type="button" class="pin-key" data-digit="8">8</button>
+        <button type="button" class="pin-key" data-digit="9">9</button>
+        <span></span>
+        <button type="button" class="pin-key" data-digit="0">0</button>
+        <button type="button" class="pin-key erase" data-erase="true" aria-label="Letzte Ziffer löschen">⌫</button>
+      </div>
+      <button id="pinCancel" type="button" class="pin-cancel" hidden>Abbrechen</button>
+    </div>
+  </section>
+  <input id="importFile" type="file" accept=".json,application/json" hidden>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
