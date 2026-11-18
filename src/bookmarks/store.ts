@@ -1,3 +1,4 @@
+import { messages } from '../i18n';
 import { loadBookmarks, saveBookmarks } from './model';
 import type { Bookmark } from './model';
 
@@ -6,7 +7,7 @@ export function createBookmarkStore(notify: (message: string) => void, onChange:
   try {
     items = loadBookmarks();
   } catch {
-    notify('Lokale Speicherung ist in diesem Modus gesperrt.');
+    notify(messages().storageBlocked);
   }
 
   return {
@@ -15,7 +16,7 @@ export function createBookmarkStore(notify: (message: string) => void, onChange:
       try {
         saveBookmarks(next);
       } catch {
-        notify('Speichern nicht möglich. Bitte die Browser-Einstellungen prüfen.');
+        notify(messages().saveFailed);
         return false;
       }
       items = next;

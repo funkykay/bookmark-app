@@ -1,3 +1,4 @@
+import { currentLanguage, messages } from '../i18n';
 import { hostname } from './model';
 import type { Bookmark } from './model';
 
@@ -17,12 +18,12 @@ export function createBookmarkCard(bookmark: Bookmark, content: HTMLAnchorElemen
   if (content instanceof HTMLAnchorElement) {
     content.href = url;
     content.title = url;
-    content.setAttribute('aria-label', `${name} öffnen`);
+    content.setAttribute('aria-label', messages().openNamed(name));
   }
 
   const glyph = document.createElement('span');
   glyph.className = 'glyph';
-  glyph.textContent = (name.charAt(0) || '?').toLocaleUpperCase('de');
+  glyph.textContent = (name.charAt(0) || '?').toLocaleUpperCase(currentLanguage());
   const colorIndex = [...domain].reduce((sum, char) => sum + char.charCodeAt(0), 0) % tiles.length;
   const [background, foreground] = tiles[colorIndex] ?? tiles[0];
   glyph.style.setProperty('--tile-bg', background);

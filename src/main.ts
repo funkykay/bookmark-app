@@ -4,11 +4,13 @@ import { initBookmarks } from './bookmarks/view';
 import { createToast, element } from './dom';
 import { initPin } from './pin/view';
 import { initReorder } from './reorder/view';
+import { initLanguage } from './settings/language';
 import { initSettings } from './settings/view';
 import { createNavigation } from './views';
 import type { ViewName } from './views';
 
 const notify = createToast();
+const clearLanguage = initLanguage(notify);
 const store = createBookmarkStore(notify, () => navigation.refresh());
 let previousView: Exclude<ViewName, 'pin'> = 'bookmarks';
 const pin = initPin({
@@ -21,7 +23,7 @@ const pin = initPin({
   returnFromPin() { navigation.show(previousView); },
 });
 
-const settings = initSettings({ store, pin, notify });
+const settings = initSettings({ store, pin, notify, clearLanguage });
 const navigation = createNavigation({
   bookmarks: initBookmarks({ store, pin }),
   reorder: initReorder(store),

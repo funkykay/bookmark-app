@@ -461,6 +461,17 @@ h2 {
   }
 }
 
+#languageSelect {
+  min-height: 40px;
+  margin-top: 6px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background-color: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
 .pin-settings-row {
   display: flex;
   align-items: center;

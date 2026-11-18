@@ -1,3 +1,4 @@
+import { messages } from '../i18n';
 import { createBookmarkCard } from '../bookmarks/card';
 import type { BookmarkStore } from '../bookmarks/store';
 import { element } from '../dom';
@@ -24,8 +25,8 @@ export function initReorder(store: BookmarkStore): View {
       const action = document.createElement('button');
       action.type = 'button';
       action.className = 'drag-handle';
-      action.title = 'Ziehen oder mit Pfeiltasten verschieben';
-      action.setAttribute('aria-label', `${bookmark.name} verschieben. Ziehen oder Pfeiltasten nutzen.`);
+      action.title = messages().dragHint;
+      action.setAttribute('aria-label', messages().moveNamed(bookmark.name));
       action.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4v16M15 4v16" stroke-dasharray="1 4" stroke-width="3.5"/></svg>';
       const card = createBookmarkCard(bookmark, document.createElement('div'), action);
       card.classList.add('reordering');
@@ -139,7 +140,7 @@ export function initReorder(store: BookmarkStore): View {
     next.splice(nextIndex, 0, moved);
     if (!store.save(next)) return;
     list.children[nextIndex]?.querySelector('button')?.focus();
-    announcer.textContent = `${moved.name}, Position ${nextIndex + 1} von ${next.length}`;
+    announcer.textContent = messages().position(moved.name, nextIndex + 1, next.length);
   }
 
   list.addEventListener('pointerdown', startDrag);

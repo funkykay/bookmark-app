@@ -10,6 +10,7 @@ Eine kleine Web-App, mit der du deine Lieblingslinks direkt im Browser sammeln u
 - Nach Namen oder URL suchen
 - Die Reihenfolge per Ziehen oder mit den Pfeiltasten ändern
 - Unter **Einstellungen → Daten** Lesezeichen als JSON-Datei importieren und exportieren oder alle lokalen App-Daten einschließlich PIN-Schutz löschen
+- Unter **Einstellungen → Sprache** zwischen Deutsch und Englisch wechseln. Die gespeicherte Auswahl hat Vorrang. Ohne Auswahl startet die App bei deutscher Browsersprache (etwa `de-AT` oder `de-CH`) auf Deutsch, sonst auf Englisch.
 - Die Oberfläche optional mit einer PIN sperren
 
 Die App speichert deine Lesezeichen und PIN-Einstellungen im Browser (`localStorage`). Zum Übertragen deiner Lesezeichen auf ein anderes Gerät oder an einen anderen Speicherort verwende den JSON-Export und -Import. Auch mit aktivierter PIN bleiben die gespeicherten Lesezeichen im Klartext.
@@ -37,7 +38,8 @@ Der Build erzeugt eine einzelne Datei, `dist/index.html`. Sie enthält die Style
 
 ## Struktur
 
-- `index.html` enthält das deutsche Seiten-Markup und ist der Einstiegspunkt für Vite.
+- `index.html` enthält das Seiten-Markup mit Übersetzungsschlüsseln und ist der Einstiegspunkt für Vite.
+- `src/i18n/` enthält die beiden typgeprüften Sprachkataloge. Statische Texte und Attribute verwenden `data-i18n`-Bindungen, dynamische Texte kommen über `messages()` aus dem aktiven Katalog. Beide Sprachen sind im Offline-Build enthalten.
 - `src/main.ts` registriert die vier Ansichten. `src/views.ts` wechselt die sichtbare Ansicht und setzt den Tastaturfokus auf ihre Überschrift.
 - `src/bookmarks/` enthält die Lesezeichenansicht, die Validierung und den lokalen Speicher. Die Sortieransicht in `src/reorder/` verwendet dieselben Lesezeichen und Karten.
 - `src/settings/view.ts` enthält die Einstellungen für PIN-Schutz und Datenverwaltung.

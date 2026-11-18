@@ -1,3 +1,4 @@
+import { messages } from '../i18n';
 import { element } from '../dom';
 
 const storageKey = 'donni-darstellung-v1';
@@ -33,7 +34,7 @@ export function initAppearance(notify: (message: string) => void) {
     try {
       localStorage.setItem(storageKey, JSON.stringify({ mode: mode.value, palette: palette.value }));
     } catch {
-      notify('Darstellung nur für diese Sitzung übernommen.');
+      notify(messages().appearanceSession);
     }
   });
   systemDark.addEventListener('change', apply);
@@ -46,7 +47,7 @@ export function initAppearance(notify: (message: string) => void) {
     try {
       localStorage.removeItem(storageKey);
     } catch {
-      notify('Darstellung konnte nicht zurückgesetzt werden.');
+      notify(messages().appearanceResetFailed);
       return false;
     }
     form.reset();

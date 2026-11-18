@@ -1,3 +1,4 @@
+import { currentLanguage, messages } from '../i18n';
 import { element } from '../dom';
 import type { View } from '../views';
 import type { PinControls } from '../pin/view';
@@ -55,15 +56,15 @@ export function initBookmarks({ store, pin }: Options): View {
 
   function render(): void {
     lockButton.hidden = !pin.enabled;
-    const query = search.value.trim().toLocaleLowerCase('de');
-    const shown = store.items.filter(({ name, url }) => `${name} ${url}`.toLocaleLowerCase('de').includes(query));
+    const query = search.value.trim().toLocaleLowerCase(currentLanguage());
+    const shown = store.items.filter(({ name, url }) => `${name} ${url}`.toLocaleLowerCase(currentLanguage()).includes(query));
     const fragment = document.createDocumentFragment();
     for (const bookmark of shown) fragment.append(createCard(bookmark));
     list.replaceChildren(fragment);
 
     const searching = Boolean(store.items.length && query);
     empty.hidden = shown.length > 0;
-    emptyText.textContent = searching ? 'Keine Treffer' : 'Noch keine Lesezeichen';
+    emptyText.textContent = searching ? messages().noResults : messages().noBookmarks;
     emptyAdd.hidden = searching;
   }
 
@@ -71,7 +72,7 @@ export function initBookmarks({ store, pin }: Options): View {
     const action = document.createElement('button');
     action.type = 'button';
     action.className = 'edit';
-    action.setAttribute('aria-label', `${bookmark.name} bearbeiten`);
+    action.setAttribute('aria-label', messages().editNamed(bookmark.name));
     action.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>';
     action.addEventListener('click', () => openEditor(bookmark));
     return createBookmarkCard(bookmark, document.createElement('a'), action);
@@ -80,7 +81,7 @@ export function initBookmarks({ store, pin }: Options): View {
   function openEditor(bookmark?: Bookmark): void {
     closeMenu();
     editingId = bookmark?.id ?? null;
-    editorTitle.textContent = bookmark ? 'Lesezeichen bearbeiten' : 'Lesezeichen hinzufügen';
+    editorTitle.textContent = bookmark ? messages().editBookmark : messages().addBookmark;
     nameInput.value = bookmark?.name ?? '';
     urlInput.value = bookmark?.url ?? '';
     deleteButton.hidden = !bookmark;
@@ -94,12 +95,12 @@ export function initBookmarks({ store, pin }: Options): View {
     const name = nameInput.value.trim().slice(0, maxNameLength);
     const url = normalizeUrl(urlInput.value);
     if (!name) {
-      error.textContent = 'Bitte einen Namen eingeben.';
+      error.textContent = messages().missingName;
       nameInput.focus();
       return;
     }
     if (!url) {
-      error.textContent = 'Bitte eine gültige Webadresse eingeben.';
+      error.textContent = messages().invalidUrl;
       urlInput.focus();
       return;
     }
@@ -112,7 +113,7 @@ export function initBookmarks({ store, pin }: Options): View {
 
   function deleteBookmark(): void {
     const bookmark = store.items.find(({ id }) => id === editingId);
-    if (!bookmark || !window.confirm(`„${bookmark.name}“ löschen?`)) return;
+    if (!bookmark || !window.confirm(messages().deleteNamed(bookmark.name))) return;
     if (store.save(store.items.filter(({ id }) => id !== bookmark.id))) editor.close();
   }
 

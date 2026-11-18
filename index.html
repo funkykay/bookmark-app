@@ -1,26 +1,26 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light dark">
   <meta id="themeColor" name="theme-color" content="#f7f8fa">
-  <title>Lesezeichen</title>
+  <title data-i18n="bookmarks"></title>
 </head>
 <body>
   <main id="bookmarksView" class="app" aria-labelledby="bookmarksTitle" hidden>
     <header>
-      <h1 id="bookmarksTitle" tabindex="-1">Lesezeichen</h1>
+      <h1 id="bookmarksTitle" tabindex="-1" data-i18n="bookmarks"></h1>
       <div class="actions">
-        <button id="menuButton" class="icon-button" type="button" aria-label="Weitere Optionen" aria-controls="popup" aria-expanded="false">
+        <button id="menuButton" class="icon-button" type="button" data-i18n-aria-label="moreOptions" aria-controls="popup" aria-expanded="false">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>
         </button>
         <div id="popup" class="popup" hidden>
-          <button id="reorderButton" type="button">Reihenfolge ändern</button>
-          <button id="settingsButton" type="button">Einstellungen</button>
-          <button id="lockButton" type="button" hidden>Jetzt sperren</button>
+          <button id="reorderButton" type="button" data-i18n="reorder"></button>
+          <button id="settingsButton" type="button" data-i18n="settings"></button>
+          <button id="lockButton" type="button" hidden data-i18n="lockNow"></button>
         </div>
-        <button id="addButton" class="icon-button primary" type="button" aria-label="Lesezeichen hinzufügen">
+        <button id="addButton" class="icon-button primary" type="button" data-i18n-aria-label="addBookmark">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
         </button>
       </div>
@@ -28,80 +28,87 @@
 
     <div class="search">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7"/><path d="m16 16 5 5"/></svg>
-      <input id="search" type="search" placeholder="Suchen" autocomplete="off" aria-label="Lesezeichen suchen">
+      <input id="search" type="search" data-i18n-placeholder="search" autocomplete="off" data-i18n-aria-label="searchBookmarks">
     </div>
     <ul id="list" class="bookmarks" role="list"></ul>
     <div id="empty" class="empty" hidden>
-      <span id="emptyText">Noch keine Lesezeichen</span>
-      <button id="emptyAdd" type="button">Hinzufügen</button>
+      <span id="emptyText"></span>
+      <button id="emptyAdd" type="button" data-i18n="add"></button>
     </div>
   </main>
 
   <main id="reorderView" class="app" aria-labelledby="reorderTitle" hidden>
     <header>
-      <h1 id="reorderTitle" tabindex="-1">Reihenfolge ändern</h1>
-      <button id="doneReorderButton" class="done-button" type="button">Fertig</button>
+      <h1 id="reorderTitle" tabindex="-1" data-i18n="reorder"></h1>
+      <button id="doneReorderButton" class="done-button" type="button" data-i18n="done"></button>
     </header>
     <ul id="reorderList" class="bookmarks" role="list"></ul>
     <span id="reorderAnnouncer" class="sr-only" role="status" aria-live="polite"></span>
-    <p id="reorderEmpty" class="empty" hidden>Noch keine Lesezeichen</p>
+    <p id="reorderEmpty" class="empty" hidden data-i18n="noBookmarks"></p>
   </main>
 
   <dialog id="editor" aria-labelledby="editorTitle">
     <form id="editorForm" class="dialog-inner" novalidate>
-      <h2 id="editorTitle">Lesezeichen hinzufügen</h2>
-      <label class="field">Name<input id="nameInput" type="text" maxlength="100" autocomplete="off" required placeholder="Name"></label>
-      <label class="field">Adresse<input id="urlInput" type="url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" required placeholder="https://"></label>
+      <h2 id="editorTitle"></h2>
+      <label class="field"><span data-i18n="name"></span><input id="nameInput" type="text" maxlength="100" autocomplete="off" required data-i18n-placeholder="name"></label>
+      <label class="field"><span data-i18n="address"></span><input id="urlInput" type="url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" required placeholder="https://"></label>
       <p id="error" class="error" role="alert"></p>
       <div class="dialog-actions">
-        <button id="deleteButton" class="remove" type="button" hidden>Löschen</button>
-        <button id="cancelButton" class="secondary" type="button">Abbrechen</button>
-        <button class="save" type="submit">Speichern</button>
+        <button id="deleteButton" class="remove" type="button" hidden data-i18n="delete"></button>
+        <button id="cancelButton" class="secondary" type="button" data-i18n="cancel"></button>
+        <button class="save" type="submit" data-i18n="save"></button>
       </div>
     </form>
   </dialog>
 
   <main id="settingsView" class="app" aria-labelledby="settingsTitle" hidden>
     <header>
-      <h1 id="settingsTitle" tabindex="-1">Einstellungen</h1>
-      <button id="backFromSettings" class="done-button" type="button">Zurück</button>
+      <h1 id="settingsTitle" tabindex="-1" data-i18n="settings"></h1>
+      <button id="backFromSettings" class="done-button" type="button" data-i18n="back"></button>
     </header>
+    <section class="settings-group" aria-labelledby="languageTitle">
+      <h2 id="languageTitle" data-i18n="language"></h2>
+      <select id="languageSelect" aria-labelledby="languageTitle">
+        <option value="de" lang="de">Deutsch</option>
+        <option value="en" lang="en">English</option>
+      </select>
+    </section>
     <section class="settings-group" aria-labelledby="appearanceTitle">
-      <h2 id="appearanceTitle">Darstellung</h2>
+      <h2 id="appearanceTitle" data-i18n="appearance"></h2>
       <form id="appearanceForm">
         <fieldset>
-          <legend>Modus</legend>
+          <legend data-i18n="mode"></legend>
           <div class="mode-options">
-            <label><input class="sr-only" type="radio" name="mode" value="system" checked><span>System</span></label>
-            <label><input class="sr-only" type="radio" name="mode" value="light"><span>Hell</span></label>
-            <label><input class="sr-only" type="radio" name="mode" value="dark"><span>Dunkel</span></label>
+            <label><input class="sr-only" type="radio" name="mode" value="system" checked><span data-i18n="system"></span></label>
+            <label><input class="sr-only" type="radio" name="mode" value="light"><span data-i18n="light"></span></label>
+            <label><input class="sr-only" type="radio" name="mode" value="dark"><span data-i18n="dark"></span></label>
           </div>
         </fieldset>
         <fieldset>
-          <legend>Farbwelt</legend>
+          <legend data-i18n="palette"></legend>
           <div class="palette-options">
-            <label><input class="sr-only" type="radio" name="palette" value="glacier" checked><span class="swatch glacier">Gletscher</span></label>
-            <label><input class="sr-only" type="radio" name="palette" value="lagoon"><span class="swatch lagoon">Lagune</span></label>
-            <label><input class="sr-only" type="radio" name="palette" value="sunset"><span class="swatch sunset">Abendrot</span></label>
+            <label><input class="sr-only" type="radio" name="palette" value="glacier" checked><span class="swatch glacier" data-i18n="glacier"></span></label>
+            <label><input class="sr-only" type="radio" name="palette" value="lagoon"><span class="swatch lagoon" data-i18n="lagoon"></span></label>
+            <label><input class="sr-only" type="radio" name="palette" value="sunset"><span class="swatch sunset" data-i18n="sunset"></span></label>
           </div>
         </fieldset>
       </form>
     </section>
     <section class="settings-group" aria-labelledby="securityTitle">
-      <h2 id="securityTitle">Sicherheit</h2>
+      <h2 id="securityTitle" data-i18n="security"></h2>
       <div class="pin-settings-row">
-        <span>PIN-Schutz</span>
-        <button id="pinSwitch" type="button" class="pin-switch" role="switch" aria-label="PIN-Schutz" aria-checked="false"></button>
+        <span data-i18n="pinProtection"></span>
+        <button id="pinSwitch" type="button" class="pin-switch" role="switch" data-i18n-aria-label="pinProtection" aria-checked="false"></button>
       </div>
-      <p id="pinUnavailable" class="pin-unavailable" hidden>Für den PIN-Schutz ist HTTPS oder localhost erforderlich.</p>
-      <button id="changePinButton" class="settings-action" type="button" hidden>PIN ändern</button>
+      <p id="pinUnavailable" class="pin-unavailable" hidden data-i18n="pinUnavailable"></p>
+      <button id="changePinButton" class="settings-action" type="button" hidden data-i18n="changePin"></button>
     </section>
     <section class="settings-group" aria-labelledby="dataTitle">
-      <h2 id="dataTitle">Daten</h2>
-      <button id="importButton" class="settings-action" type="button">Lesezeichen importieren</button>
+      <h2 id="dataTitle" data-i18n="data"></h2>
+      <button id="importButton" class="settings-action" type="button" data-i18n="importBookmarks"></button>
       <input id="importFile" type="file" accept=".json,application/json" hidden>
-      <button id="exportButton" class="settings-action" type="button">Lesezeichen exportieren</button>
-      <button id="purgeButton" class="settings-action danger" type="button">Alle Daten löschen</button>
+      <button id="exportButton" class="settings-action" type="button" data-i18n="exportBookmarks"></button>
+      <button id="purgeButton" class="settings-action danger" type="button" data-i18n="purge"></button>
     </section>
   </main>
 
@@ -110,15 +117,15 @@
       <div class="pin-lock-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
       </div>
-      <h1 id="pinTitle" class="pin-title" tabindex="-1">Entsperren</h1>
-      <p id="pinHint" class="pin-hint">6-stellige PIN eingeben</p>
-      <div id="pinDots" class="pin-dots" aria-label="0 von 6 Ziffern eingegeben">
+      <h1 id="pinTitle" class="pin-title" tabindex="-1"></h1>
+      <p id="pinHint" class="pin-hint"></p>
+      <div id="pinDots" class="pin-dots">
         <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
         <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
       </div>
       <p id="pinFeedback" class="pin-feedback" role="status" aria-live="polite"></p>
       <div id="pinCountdown" class="pin-countdown" role="timer" hidden></div>
-      <div id="pinKeypad" class="pin-keypad" aria-label="PIN-Zahlenfeld">
+      <div id="pinKeypad" class="pin-keypad" data-i18n-aria-label="keypad">
         <button type="button" class="pin-key" data-digit="1">1</button>
         <button type="button" class="pin-key" data-digit="2">2</button>
         <button type="button" class="pin-key" data-digit="3">3</button>
@@ -130,9 +137,9 @@
         <button type="button" class="pin-key" data-digit="9">9</button>
         <span></span>
         <button type="button" class="pin-key" data-digit="0">0</button>
-        <button type="button" class="pin-key erase" data-erase="true" aria-label="Letzte Ziffer löschen">⌫</button>
+        <button type="button" class="pin-key erase" data-erase="true" data-i18n-aria-label="eraseDigit">⌫</button>
       </div>
-      <button id="pinCancel" type="button" class="pin-cancel" hidden>Abbrechen</button>
+      <button id="pinCancel" type="button" class="pin-cancel" hidden data-i18n="cancel"></button>
     </div>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>

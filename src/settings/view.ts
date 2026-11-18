@@ -1,3 +1,4 @@
+import { messages } from '../i18n';
 import { createId, parseImport } from '../bookmarks/model';
 import type { Bookmark } from '../bookmarks/model';
 import type { BookmarkStore } from '../bookmarks/store';
@@ -8,11 +9,12 @@ import { initAppearance } from './appearance';
 
 interface Options {
   store: BookmarkStore;
+  clearLanguage: () => boolean;
   pin: Pick<PinControls, 'enabled' | 'toggleProtection' | 'changePin' | 'clearSettings'>;
   notify: (message: string) => void;
 }
 
-export function initSettings({ store, pin, notify }: Options): View {
+export function initSettings({ store, pin, notify, clearLanguage }: Options): View {
   const clearAppearance = initAppearance(notify);
   const pinSwitch = element('pinSwitch', 'button');
   const changeButton = element('changePinButton', 'button');
@@ -25,7 +27,7 @@ export function initSettings({ store, pin, notify }: Options): View {
     const objectUrl = URL.createObjectURL(new Blob([output], { type: 'application/json' }));
     const link = document.createElement('a');
     link.href = objectUrl;
-    link.download = 'lesezeichen-backup.json';
+    link.download = messages().backupFilename;
     document.body.append(link);
     link.click();
     link.remove();
@@ -42,7 +44,7 @@ export function initSettings({ store, pin, notify }: Options): View {
     try {
       entries = parseImport(await file.text());
     } catch {
-      notify('Datei konnte nicht importiert werden.');
+      notify(messages().importFailed);
       return;
     }
     if (version !== purgeVersion) return;
@@ -54,18 +56,18 @@ export function initSettings({ store, pin, notify }: Options): View {
       fresh.push({ ...entry, id: createId() });
     }
     if (!fresh.length) {
-      notify('Keine neuen Lesezeichen');
+      notify(messages().noNewBookmarks);
       return;
     }
-    if (store.save([...fresh, ...store.items])) notify(`${fresh.length} Lesezeichen importiert`);
+    if (store.save([...fresh, ...store.items])) notify(messages().imported(fresh.length));
   }
 
   function purgeData(): void {
-    if (!window.confirm('Alle Lesezeichen löschen und die Einstellungen für PIN und Darstellung in diesem Browser zurücksetzen?')) return;
+    if (!window.confirm(messages().confirmPurge)) return;
     purgeVersion++;
-    if (!store.save([]) || !pin.clearSettings() || !clearAppearance()) return;
+    if (!store.save([]) || !pin.clearSettings() || !clearAppearance() || !clearLanguage()) return;
     render();
-    notify('Alle App-Daten wurden gelöscht.');
+    notify(messages().purged);
   }
 
   function render(): void {

@@ -1,3 +1,4 @@
+import { messages } from '../i18n';
 import type { View } from '../views';
 import { element } from '../dom';
 import { createPinSettings, loadPinSettings, matchesPin, savePinSettings } from './model';
@@ -10,11 +11,11 @@ type Gate =
   | { mode: 'confirm'; purpose: Purpose; firstPin: string };
 
 const gateText = {
-  unlock: ['Entsperren', '6-stellige PIN eingeben'],
-  'verify-disable': ['PIN-Schutz ausschalten', 'Aktuelle PIN eingeben'],
-  'verify-change': ['PIN ändern', 'Aktuelle PIN eingeben'],
-  create: ['PIN festlegen', 'Neue 6-stellige PIN'],
-  confirm: ['PIN bestätigen', 'PIN erneut eingeben'],
+  unlock: ['unlock', 'enterPin'],
+  'verify-disable': ['disablePin', 'currentPin'],
+  'verify-change': ['changePin', 'currentPin'],
+  create: ['setPin', 'newPin'],
+  confirm: ['confirmPin', 'repeatPin'],
 } as const;
 
 const lockDuration = 60 * 60 * 1000;
@@ -44,7 +45,7 @@ export function initPin({ notify, showPin, returnFromPin }: Options) {
     try {
       savePinSettings(next);
     } catch {
-      notify('PIN-Schutz konnte nicht gespeichert werden.');
+      notify(messages().pinSaveFailed);
       return false;
     }
     settings = next;
@@ -64,8 +65,8 @@ export function initPin({ notify, showPin, returnFromPin }: Options) {
     const seconds = secondsUntilUnlock();
     const locked = seconds > 0;
     const [heading, instruction] = gateText[gate.mode];
-    title.textContent = locked ? 'Gesperrt' : heading;
-    hint.textContent = locked ? 'Erneut versuchen in' : instruction;
+    title.textContent = locked ? messages().locked : messages()[heading];
+    hint.textContent = locked ? messages().retryIn : messages()[instruction];
     keypad.hidden = locked;
     dots.hidden = locked;
     countdown.hidden = !locked;
@@ -75,7 +76,7 @@ export function initPin({ notify, showPin, returnFromPin }: Options) {
       countdown.textContent = parts.map((part) => String(part).padStart(2, '0')).join(':');
     }
     feedback.textContent = locked ? '' : error;
-    dots.setAttribute('aria-label', `${buffer.length} von 6 Ziffern eingegeben`);
+    dots.setAttribute('aria-label', messages().digitsEntered(buffer.length));
     Array.from(dots.children).forEach((dot, index) => dot.toggleAttribute('data-filled', index < buffer.length));
   }
 
@@ -111,7 +112,7 @@ export function initPin({ notify, showPin, returnFromPin }: Options) {
       return;
     }
     const remaining = 3 - attempts;
-    error = `Falsche PIN · Noch ${remaining} ${remaining === 1 ? 'Versuch' : 'Versuche'}`;
+    error = messages().wrongPin(remaining);
   }
 
   async function completePin(current: Gate, pin: string): Promise<void> {
@@ -123,16 +124,16 @@ export function initPin({ notify, showPin, returnFromPin }: Options) {
     try {
       if (current.mode === 'confirm') {
         if (current.firstPin !== pin) {
-          goTo({ mode: 'create', purpose: current.purpose }, 'PINs stimmen nicht überein');
+          goTo({ mode: 'create', purpose: current.purpose }, messages().pinMismatch);
           return;
         }
         const next = await createPinSettings(pin);
         if (gate !== current) return;
         if (persist(next)) {
           closeGate();
-          notify(current.purpose === 'change' ? 'PIN geändert' : 'PIN-Schutz aktiviert');
+          notify(current.purpose === 'change' ? messages().pinChanged : messages().pinEnabled);
         } else {
-          goTo({ mode: 'create', purpose: current.purpose }, 'Speichern nicht möglich');
+          goTo({ mode: 'create', purpose: current.purpose }, messages().unableToSave);
         }
         return;
       }
@@ -146,9 +147,9 @@ export function initPin({ notify, showPin, returnFromPin }: Options) {
       } else if (current.mode === 'verify-disable') {
         if (persist(null)) {
           closeGate();
-          notify('PIN-Schutz deaktiviert');
+          notify(messages().pinDisabled);
         } else {
-          error = 'Deaktivieren fehlgeschlagen';
+          error = messages().disableFailed;
         }
       } else {
         if (settings?.attempts || settings?.lockUntil) {
@@ -159,7 +160,7 @@ export function initPin({ notify, showPin, returnFromPin }: Options) {
         else closeGate();
       }
     } catch {
-      if (gate === current) error = 'PIN konnte nicht verarbeitet werden.';
+      if (gate === current) error = messages().pinFailed;
     } finally {
       if (gate === current) {
         buffer = '';
