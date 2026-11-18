@@ -26,8 +26,9 @@ Der Build erzeugt eine einzelne Datei, `dist/index.html`. Sie enthält die Style
 ## Struktur
 
 - `index.html` enthält das deutsche Seiten-Markup und ist der Einstiegspunkt für Vite.
-- `src/main.ts` verbindet Navigation, Lesezeichen und PIN-Sperre.
-- `src/bookmarks/` enthält die Lesezeichenansicht, die Validierung und den lokalen JSON-Speicher.
+- `src/main.ts` registriert die vier Ansichten. `src/views.ts` wechselt die sichtbare Ansicht und setzt den Tastaturfokus auf ihre Überschrift.
+- `src/bookmarks/` enthält die Lesezeichenansicht, die Validierung und den lokalen Speicher. Die Sortieransicht in `src/reorder/` verwendet dieselben Lesezeichen und Karten.
+- `src/settings/view.ts` verbindet die Bedienelemente der Einstellungen mit dem PIN-Schutz. Weitere Einstellungsbereiche können in dieser Ansicht ergänzt werden.
 - `src/pin/` enthält die PIN-Oberfläche und verwendet Web Crypto für die PIN-Prüfung.
 - `src/styles.scss` enthält die Komponentenstile und die Farben für Hell- und Dunkelmodus.
 

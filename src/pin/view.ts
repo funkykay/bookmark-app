@@ -1,3 +1,4 @@
+import type { View } from '../views';
 import { element } from '../dom';
 import { createPinSettings, loadPinSettings, matchesPin, savePinSettings } from './model';
 import type { PinSettings } from './model';
@@ -19,18 +20,13 @@ const gateText = {
 const lockDuration = 60 * 60 * 1000;
 
 interface Options {
-  closeMenu: () => void;
   notify: (message: string) => void;
-  setAppHidden: (hidden: boolean) => void;
+  showPin: () => void;
+  returnFromPin: () => void;
 }
 
-export function initPin({ closeMenu, notify, setAppHidden }: Options): void {
-  const dialog = element('securityDialog', 'dialog');
-  const pinSwitch = element('pinSwitch', 'button');
-  const changeButton = element('changePinButton', 'button');
-  const lockButton = element('lockButton', 'button');
-  const gateElement = element('pinGate', 'section');
-  const title = element('pinTitle', 'h2');
+export function initPin({ notify, showPin, returnFromPin }: Options) {
+  const title = element('pinTitle', 'h1');
   const hint = element('pinHint', 'p');
   const dots = element('pinDots', 'div');
   const feedback = element('pinFeedback', 'p');
@@ -43,12 +39,6 @@ export function initPin({ closeMenu, notify, setAppHidden }: Options): void {
   let buffer = '';
   let error = '';
   let busy = false;
-
-  function refreshSecurityMenu(): void {
-    lockButton.hidden = !settings;
-    changeButton.hidden = !settings;
-    pinSwitch.setAttribute('aria-checked', String(Boolean(settings)));
-  }
 
   function persist(next: PinSettings | null): boolean {
     try {
@@ -99,11 +89,8 @@ export function initPin({ closeMenu, notify, setAppHidden }: Options): void {
   }
 
   function openGate(next: Gate): void {
-    dialog.close();
-    closeMenu();
-    setAppHidden(true);
-    gateElement.hidden = false;
     goTo(next);
+    showPin();
   }
 
   function closeGate(): void {
@@ -111,10 +98,7 @@ export function initPin({ closeMenu, notify, setAppHidden }: Options): void {
     buffer = '';
     error = '';
     busy = false;
-    gateElement.hidden = true;
-    setAppHidden(false);
-    refreshSecurityMenu();
-    element('menuButton', 'button').focus();
+    returnFromPin();
   }
 
   function registerFailure(previous: PinSettings): void {
@@ -202,18 +186,6 @@ export function initPin({ closeMenu, notify, setAppHidden }: Options): void {
     if (settings && gate?.mode !== 'unlock') openGate({ mode: 'unlock' });
   }
 
-  element('securityButton', 'button').addEventListener('click', () => {
-    closeMenu();
-    dialog.showModal();
-  });
-  element('closeSecurityButton', 'button').addEventListener('click', () => dialog.close());
-  dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
-  pinSwitch.addEventListener('click', () => {
-    if (settings) openGate({ mode: 'verify-disable' });
-    else openGate({ mode: 'create', purpose: 'enable' });
-  });
-  changeButton.addEventListener('click', () => openGate({ mode: 'verify-change' }));
-  lockButton.addEventListener('click', lockApp);
   keypad.addEventListener('click', (event) => {
     const key = event.target instanceof Element ? event.target.closest('button') : null;
     if (key?.dataset.digit !== undefined) enterKey(key.dataset.digit);
@@ -234,10 +206,17 @@ export function initPin({ closeMenu, notify, setAppHidden }: Options): void {
   window.addEventListener('pagehide', lockApp);
   window.setInterval(() => { if (isVerifying() && settings?.lockUntil) renderGate(); }, 1000);
 
-  const unavailable = !crypto.subtle;
-  pinSwitch.disabled = unavailable;
-  element('pinUnavailable', 'p').hidden = !unavailable;
-  refreshSecurityMenu();
-  if (settings) openGate({ mode: 'unlock' });
-  else setAppHidden(false);
+  const view: View = { root: element('pinGate', 'main') };
+  return {
+    view,
+    get enabled() { return Boolean(settings); },
+    lock: lockApp,
+    toggleProtection() {
+      if (settings) openGate({ mode: 'verify-disable' });
+      else openGate({ mode: 'create', purpose: 'enable' });
+    },
+    changePin() { openGate({ mode: 'verify-change' }); },
+  };
 }
+
+export type PinControls = ReturnType<typeof initPin>;
