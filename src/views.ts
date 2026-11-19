@@ -11,6 +11,7 @@ export interface View {
 export function createNavigation(views: Record<ViewName, View>) {
   let current: ViewName | undefined;
   const desktopNav = element('desktopNav', 'nav');
+  const desktopAdd = element('desktopAdd', 'button');
   const destinations = desktopNav.querySelectorAll<HTMLButtonElement>('button[data-view]');
 
   for (const button of document.querySelectorAll<HTMLButtonElement>('button[data-view]')) {
@@ -27,6 +28,7 @@ export function createNavigation(views: Record<ViewName, View>) {
     }
     current = next;
     desktopNav.hidden = next === 'pin';
+    desktopAdd.hidden = next !== 'bookmarks';
     for (const button of destinations) {
       if (button.dataset.view === next) button.setAttribute('aria-current', 'page');
       else button.removeAttribute('aria-current');

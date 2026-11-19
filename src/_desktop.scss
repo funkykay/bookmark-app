@@ -24,6 +24,7 @@
     button {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 10px;
       min-height: 40px;
       padding: 6px 12px;
@@ -35,13 +36,15 @@
       font-weight: 600;
     }
 
-    button:first-child {
+    button[data-view="bookmarks"] {
       margin-inline-end: auto;
       font-size: 17px;
     }
 
     button:hover { background: var(--soft); }
-    button[aria-current] { color: var(--accent); background: var(--accent-tint); }
+    button[aria-current] { color: var(--accent); }
+    .icon-button[aria-current] { background: var(--accent-tint); }
+    .icon-button { width: 40px; height: 40px; padding: 0; }
 
     .app-mark { width: 29px; height: 29px; color: var(--accent); }
   }
@@ -57,20 +60,10 @@
   }
 
   #bookmarksView .actions { margin-inline-start: auto; }
+  #bookmarksView header:has(#desktopLock[hidden]) { margin-bottom: 0; }
 
   .desktop-only { display: inline; }
-  #menuButton, #popup { display: none; }
-
-  #addButton {
-    width: auto;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding-inline: 16px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-  }
+  #menuButton, #popup, #addButton { display: none; }
 
   .search-row {
     flex-wrap: wrap;

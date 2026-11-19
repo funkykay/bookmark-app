@@ -13,11 +13,21 @@
   <nav id="desktopNav" class="desktop-nav" data-i18n-aria-label="navigation" hidden>
     <div class="desktop-nav-inner">
       <button type="button" data-view="bookmarks">
-        <svg class="app-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="currentColor"/><path d="M10 7h12v19l-6-4-6 4z" fill="var(--on-accent)"/></svg>
+        <svg class="app-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 2h14v20l-7-4.5L5 22z" fill="currentColor"/></svg>
         <span data-i18n="bookmarks"></span>
       </button>
-      <button type="button" data-view="labels" data-i18n="labels"></button>
-      <button type="button" data-view="settings" data-i18n="settings"></button>
+      <button id="desktopAdd" class="icon-button" type="button" data-i18n-aria-label="addBookmark" data-i18n-title="addBookmark" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+      <button class="icon-button" type="button" data-view="labels" data-i18n-aria-label="labels" data-i18n-title="labels">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h8l10 10-8 8L3 11z"/><circle cx="7.5" cy="7.5" r="1" fill="currentColor" stroke="none"/></svg>
+      </button>
+      <button class="icon-button" type="button" data-view="settings" data-i18n-aria-label="settings" data-i18n-title="settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m10 2-.5 2.5-1.8.8-2.2-1.4-2.8 2.8 1.4 2.2-.8 1.8L1 11v3l2.5.5.8 1.8-1.4 2.2 2.8 2.8 2.2-1.4 1.8.8L10 23h4l.5-2.5 1.8-.8 2.2 1.4 2.8-2.8-1.4-2.2.8-1.8L23 14v-3l-2.5-.5-.8-1.8 1.4-2.2-2.8-2.8-2.2 1.4-1.8-.8L14 2z" transform="translate(1.2 .75) scale(.9)"/>
+          <circle cx="12" cy="12" r="3.2"/>
+        </svg>
+      </button>
     </div>
   </nav>
   <main id="bookmarksView" class="app" aria-labelledby="bookmarksTitle" hidden>
@@ -35,7 +45,6 @@
         </div>
         <button id="addButton" class="icon-button primary" type="button" data-i18n-aria-label="addBookmark">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-          <span class="desktop-only" data-i18n="addBookmark"></span>
         </button>
       </div>
     </header>

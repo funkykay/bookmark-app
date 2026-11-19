@@ -149,6 +149,7 @@ export function initBookmarks({ store, pin }: Options): View {
   editor.addEventListener('click', (event) => { if (event.target === editor) editor.close(); });
   deleteButton.addEventListener('click', deleteBookmark);
   addButton.addEventListener('click', () => openEditor());
+  element('desktopAdd', 'button').addEventListener('click', () => openEditor());
   emptyAdd.addEventListener('click', () => openEditor());
   search.addEventListener('input', renderList);
   labelFilter.addEventListener('change', renderList);
