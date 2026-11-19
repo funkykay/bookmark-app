@@ -218,8 +218,8 @@
   <!-- legal-pages:start -->
   <link rel="stylesheet" href="/src/legal.scss">
   <main id="legalView" class="app legal-page" aria-labelledby="legalTitle" hidden>
-    <a href="?" class="legal-back" data-i18n="backToApp"></a>
-    <h1 id="legalTitle"></h1>
+    <a data-view="bookmarks" class="legal-back" data-i18n="backToApp"></a>
+    <h1 id="legalTitle" tabindex="-1"></h1>
     <h2 id="operatorRole"></h2>
     <address>
       Kay Donner<br>
@@ -251,8 +251,8 @@
   </main>
 
   <footer class="legal-links">
-    <a href="?seite=impressum" data-i18n="imprint"></a>
-    <a href="?seite=datenschutz" data-i18n="privacy"></a>
+    <a data-view="imprint" data-i18n="imprint"></a>
+    <a data-view="privacy" data-i18n="privacy"></a>
   </footer>
   <!-- legal-pages:end -->
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>

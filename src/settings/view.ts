@@ -121,6 +121,7 @@ export function initSettings({ store, pin, notify, clearLanguage }: Options): Vi
   storage.onBackupChange(updatePurgeButton);
 
   return {
+    path: '/settings',
     root: element('settingsView', 'main'),
     render,
   };

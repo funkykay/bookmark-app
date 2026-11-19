@@ -80,6 +80,7 @@ export function initLabels(store: BookmarkStore): View {
   element('cancelLabel', 'button').addEventListener('click', () => dialog.close());
   dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
   return {
+    path: '/labels',
     root: element('labelsView', 'main'),
     render,
     leave() { if (dialog.open) dialog.close(); },

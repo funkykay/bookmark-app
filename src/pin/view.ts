@@ -22,11 +22,10 @@ const lockDuration = 60 * 60 * 1000;
 
 interface Options {
   notify: (message: string) => void;
-  showPin: () => void;
-  returnFromPin: () => void;
+  onGateChange: () => void;
 }
 
-export function initPin({ notify, showPin, returnFromPin }: Options) {
+export function initPin({ notify, onGateChange }: Options) {
   const title = element('pinTitle', 'h1');
   const hint = element('pinHint', 'p');
   const dots = element('pinDots', 'div');
@@ -91,7 +90,7 @@ export function initPin({ notify, showPin, returnFromPin }: Options) {
 
   function openGate(next: Gate): void {
     goTo(next);
-    showPin();
+    onGateChange();
   }
 
   function closeGate(): void {
@@ -99,7 +98,7 @@ export function initPin({ notify, showPin, returnFromPin }: Options) {
     buffer = '';
     error = '';
     busy = false;
-    returnFromPin();
+    onGateChange();
   }
 
   function registerFailure(previous: PinSettings): void {
@@ -194,7 +193,7 @@ export function initPin({ notify, showPin, returnFromPin }: Options) {
   });
   cancelButton.addEventListener('click', closeGate);
   document.addEventListener('keydown', (event) => {
-    if (!gate) return;
+    if (!gate || view.root.hidden) return;
     if (/^\d$/.test(event.key) || event.key === 'Backspace') {
       event.preventDefault();
       enterKey(event.key);
@@ -207,9 +206,10 @@ export function initPin({ notify, showPin, returnFromPin }: Options) {
   window.addEventListener('pagehide', lockApp);
   window.setInterval(() => { if (isVerifying() && settings?.lockUntil) renderGate(); }, 1000);
 
-  const view: View = { root: element('pinGate', 'main') };
+  const view: View = { path: '/pin', root: element('pinGate', 'main') };
   return {
     view,
+    get active() { return gate !== null; },
     get enabled() { return Boolean(settings); },
     lock: lockApp,
     clearSettings() { return persist(null); },

@@ -8,6 +8,7 @@ Eine kleine Web-App, mit der du deine Lieblingslinks direkt im Browser sammeln u
 
 - Lesezeichen hinzufügen, öffnen, bearbeiten und löschen. Neue Lesezeichen erscheinen oben.
 - Nach Namen oder URL suchen
+- Lesezeichen (`#/bookmarks`), Labels (`#/labels`) und Einstellungen (`#/settings`) direkt per URL öffnen und mit den Browser-Tasten Zurück und Vorwärts zwischen den Ansichten wechseln. Bei aktivem PIN-Schutz öffnet sich das Ziel nach dem Entsperren. In der Webversion sind Impressum (`#/impressum`) und Datenschutz (`#/datenschutz`) auch bei gesperrter App erreichbar.
 - Mehrere Labels pro Lesezeichen vergeben und die Liste nach einem Label filtern
 - Neue Labels direkt im Lesezeichen eingeben. In der Desktopnavigation unter **Labels** und mobil unter **⋯ → Labels** lassen sich Labels anlegen, umbenennen, einfärben und löschen.
 - Unter **Einstellungen → Daten** Lesezeichen und Labels als JSON-Datei importieren und exportieren. Der Dateiname enthält das lokale Datum und die Uhrzeit, etwa `lesezeichen-backup-2026-11-19_14-35-07.json`. **App zurücksetzen** löscht alle lokalen App-Daten einschließlich PIN-Schutz und ist erst nach einem Export seit der letzten Änderung verfügbar.
@@ -48,7 +49,7 @@ Der Build erzeugt eine einzelne Datei, `dist/index.html`. Sie enthält die Style
 
 - `index.html` enthält das Seiten-Markup mit Übersetzungsschlüsseln und ist der Einstiegspunkt für Vite.
 - `src/i18n/` enthält die beiden typgeprüften Sprachkataloge. Statische Texte und Attribute verwenden `data-i18n`-Bindungen, dynamische Texte kommen über `messages()` aus dem aktiven Katalog. Beide Sprachen sind im Offline-Build enthalten.
-- `src/main.ts` registriert die Ansichten. `src/views.ts` wechselt die sichtbare Ansicht und setzt den Tastaturfokus auf ihre Überschrift.
+- `src/main.ts` registriert die Ansichten. Jede Ansicht definiert ihren Pfad im Feld `View.path`. Die Navigation in `src/views.ts` synchronisiert den URL-Hash mit der sichtbaren Ansicht und setzt beim Wechsel den Tastaturfokus auf ihre Überschrift.
 - `src/storage.ts` definiert die synchrone Schnittstelle `AppStorage`. Für ein anderes Speicher-Backend lässt sich dort die exportierte Implementierung `storage` austauschen. Der Local-Storage-Adapter ordnet die App-Einträge ihren Browser-Schlüsseln zu, speichert den Zeitpunkt der letzten Datenänderung und des letzten Exports und meldet Änderungen des Backup-Status auch tabübergreifend.
 - `src/bookmarks/` enthält die Lesezeichenansicht, die Validierung und die Verwaltung der Lesezeichendaten.
 - `src/labels/` enthält die Label-Verwaltung und die Mehrfachauswahl im Lesezeichen-Editor.

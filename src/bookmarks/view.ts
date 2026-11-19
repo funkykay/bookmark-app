@@ -167,6 +167,7 @@ export function initBookmarks({ store, pin }: Options): View {
   labelFilter.addEventListener('change', renderList);
 
   return {
+    path: '/bookmarks',
     root,
     render,
     leave() {
