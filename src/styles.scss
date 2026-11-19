@@ -330,6 +330,59 @@ h1 {
   }
 }
 
+.label-suggestions {
+  position: absolute;
+  z-index: 1;
+  inset-inline: 0;
+  top: calc(100% + 4px);
+  height: min(11rem, 30dvh, var(--available-space, 11rem));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+
+  &.opens-above {
+    top: auto;
+    bottom: calc(100% + 4px);
+  }
+
+  [role="option"] {
+    display: flex;
+    align-items: center;
+    min-height: 36px;
+    padding-inline: 6px;
+    border-radius: 7px;
+    cursor: pointer;
+
+    &:hover, &[aria-selected="true"] { background: var(--accent-tint); }
+  }
+}
+
+.label-combobox {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+
+  .field & input { padding-inline-end: 32px; }
+  &::after {
+    content: '';
+    position: absolute;
+    inset-inline-end: 14px;
+    top: 50%;
+    width: 7px;
+    height: 7px;
+    border: solid var(--muted);
+    border-width: 0 1.5px 1.5px 0;
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
+  }
+}
+
 .manage-label {
   display: flex;
   align-items: center;

@@ -49,6 +49,7 @@ export const de = {
   name: 'Name',
   address: 'Adresse',
   labels: 'Labels',
+  suggestedLabels: 'Vorgeschlagene Labels',
   addLabel: 'Label hinzufügen',
   editLabel: 'Label bearbeiten',
   noLabels: 'Noch keine Labels',

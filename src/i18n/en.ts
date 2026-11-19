@@ -51,6 +51,7 @@ export const en = {
   name: 'Name',
   address: 'Address',
   labels: 'Labels',
+  suggestedLabels: 'Suggested labels',
   addLabel: 'Add label',
   editLabel: 'Edit label',
   noLabels: 'No labels yet',

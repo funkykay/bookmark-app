@@ -63,12 +63,14 @@
         <label for="labelInput" data-i18n="labels"></label>
         <div id="selectedLabels" class="label-badges"></div>
         <div class="label-entry">
-          <input id="labelInput" type="text" list="labelSuggestions" autocomplete="off" data-i18n-placeholder="addLabel">
+          <div class="label-combobox">
+            <input id="labelInput" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="labelSuggestions" autocomplete="off" data-i18n-placeholder="addLabel">
+            <ul id="labelSuggestions" class="label-suggestions" role="listbox" tabindex="-1" data-i18n-aria-label="suggestedLabels" hidden></ul>
+          </div>
           <button id="assignLabel" class="icon-button" type="button" data-i18n-aria-label="addLabel" disabled>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
           </button>
         </div>
-        <datalist id="labelSuggestions"></datalist>
       </div>
       <p id="error" class="error" role="alert"></p>
       <div class="dialog-actions">
