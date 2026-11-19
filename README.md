@@ -2,7 +2,7 @@
 
 Eine kleine Web-App, mit der du deine Lieblingslinks direkt im Browser sammeln und verwalten kannst.
 
-[Live-Demo auf funkykay.github.io/bookmark-app](https://funkykay.github.io/bookmark-app)
+[App auf bookmarks.kaydonner.de öffnen](https://bookmarks.kaydonner.de/)
 
 ## Funktionen
 
@@ -21,7 +21,7 @@ Browser-Speicher und JSON-Export verwenden dasselbe Format (Version 3). Das Back
 
 Der Import fügt neue Lesezeichen in ihrer Listenreihenfolge vorne ein. Bei bekannten Lesezeichen-IDs bleibt die lokale Fassung erhalten. Labels werden zuerst anhand der ID, dann anhand des Namens zugeordnet. Bereits vorhandene Labels behalten ihren lokalen Namen und ihre Farbe. Ungültige Dateien werden vollständig abgelehnt.
 
-Mit diesem Konzeptstand beginnen die Lesezeichenliste und der PIN-Schutz in eigenen neuen Speichereinträgen. Wer eine PIN verwenden möchte, richtet sie für diese Version neu ein.
+In dieser Version beginnen die Lesezeichenliste und der PIN-Schutz in eigenen neuen Speichereinträgen. Wer eine PIN verwenden möchte, richtet sie für diese Version neu ein.
 
 ## Entwicklung
 
@@ -39,15 +39,10 @@ npm run dev
 ```sh
 npm run typecheck   # TypeScript prüfen
 npm run build       # TypeScript prüfen und den Produktions-Build erzeugen
-npm run build:release  # Download-Version ohne Impressum und Datenschutz bauen
 npm run preview     # den Build lokal im Browser prüfen
 ```
 
 Der Build erzeugt eine einzelne Datei, `dist/index.html`. Sie enthält die Styles und das JavaScript und lässt sich per Doppelklick offline öffnen, weitergeben oder auf einem statischen Webserver bereitstellen.
-
-Der Standard-Build enthält Impressum und Datenschutzerklärung. Der Vite-Modus `release` schaltet beide Seiten beim Bauen aus. Ihre Links, Kontaktdaten, Übersetzungen, Styles und Seitenlogik entfallen aus der HTML-Datei.
-
-Bei jedem Push auf `main` veröffentlicht GitHub Actions den Standard-Build auf GitHub Pages und legt ein GitHub-Release mit dem Tag `build-<Laufnummer>` für den gepushten Commit an. Unter **Assets → index.html** findest du die Download-Version.
 
 ## Struktur
 

@@ -150,8 +150,9 @@
       <h2 id="securityTitle" data-i18n="security"></h2>
       <div class="pin-settings-row">
         <span data-i18n="pinProtection"></span>
-        <button id="pinSwitch" type="button" class="pin-switch" role="switch" data-i18n-aria-label="pinProtection" aria-checked="false"></button>
+        <button id="pinSwitch" type="button" class="pin-switch" role="switch" data-i18n-aria-label="pinProtection" aria-describedby="pinProtectionHint" aria-checked="false"></button>
       </div>
+      <p id="pinProtectionHint" class="pin-protection-hint" data-i18n="pinProtectionHint"></p>
       <p id="pinUnavailable" class="pin-unavailable" hidden data-i18n="pinUnavailable"></p>
       <button id="changePinButton" class="settings-action" type="button" hidden data-i18n="changePin"></button>
     </section>
@@ -161,6 +162,10 @@
       <input id="importFile" type="file" accept=".json,application/json" hidden>
       <button id="exportButton" class="settings-action" type="button" data-i18n="exportBookmarks"></button>
       <button id="purgeButton" class="settings-action danger" type="button" data-i18n="purge"></button>
+    </section>
+    <section class="settings-group" aria-labelledby="aboutTitle">
+      <h2 id="aboutTitle" data-i18n="aboutApp"></h2>
+      <a href="https://github.com/funkykay/bookmark-app" data-i18n="githubProject"></a>
     </section>
   </main>
 
@@ -209,7 +214,7 @@
     </address>
     <div id="privacyContent" hidden>
       <h2 data-i18n="hostingTitle"></h2>
-      <p data-i18n="hostingData"></p>
+      <p><a href="https://bookmarks.kaydonner.de/">bookmarks.kaydonner.de</a> <span data-i18n="hostingData"></span></p>
       <p data-i18n="hostingTransfer"></p>
       <p><a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" data-i18n="githubPrivacy"></a></p>
       <h2 data-i18n="localDataTitle"></h2>
