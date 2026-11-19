@@ -1,5 +1,5 @@
 {
-  "name": "bookmark-app",
+  "name": "bookmarks",
   "private": true,
   "type": "module",
   "engines": {
