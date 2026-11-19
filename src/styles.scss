@@ -94,6 +94,10 @@ h1 {
   font-weight: 720;
   letter-spacing: -.045em;
   line-height: 1.1;
+
+  &[tabindex="-1"]:focus {
+    outline: none;
+  }
 }
 
 .actions {
@@ -645,6 +649,10 @@ h2 {
     margin: 0 0 6px;
     font-size: 19px;
   }
+
+  a {
+    color: var(--accent);
+  }
 }
 
 #languageSelect {
@@ -784,10 +792,15 @@ h2 {
   }
 }
 
+.pin-protection-hint,
 .pin-unavailable {
-  margin: 12px 0 0;
+  margin: 0;
   font-size: 14px;
   color: var(--muted);
+}
+
+.pin-unavailable {
+  margin-top: 12px;
 }
 
 .settings-action {
