@@ -2,7 +2,7 @@
 
 Eine kleine Web-App, mit der du deine Lieblingslinks direkt im Browser sammeln und verwalten kannst.
 
-[Live-Demo auf funkykay.github.io/bookmark-app](https://funkykay.github.io/bookmark-app)
+[Live-Demo auf bookmarks.kaydonner.de](https://bookmarks.kaydonner.de/)
 
 ## Funktionen
 
@@ -39,15 +39,10 @@ npm run dev
 ```sh
 npm run typecheck   # TypeScript prüfen
 npm run build       # TypeScript prüfen und den Produktions-Build erzeugen
-npm run build:release  # Download-Version ohne Impressum und Datenschutz bauen
 npm run preview     # den Build lokal im Browser prüfen
 ```
 
 Der Build erzeugt eine einzelne Datei, `dist/index.html`. Sie enthält die Styles und das JavaScript und lässt sich per Doppelklick offline öffnen, weitergeben oder auf einem statischen Webserver bereitstellen.
-
-Der Standard-Build enthält Impressum und Datenschutzerklärung. Der Vite-Modus `release` schaltet beide Seiten beim Bauen aus. Ihre Links, Kontaktdaten, Übersetzungen, Styles und Seitenlogik entfallen aus der HTML-Datei.
-
-Bei jedem Push auf `main` veröffentlicht GitHub Actions den Standard-Build auf GitHub Pages und legt ein GitHub-Release mit dem Tag `build-<Laufnummer>` für den gepushten Commit an. Unter **Assets → index.html** findest du die Download-Version.
 
 ## Struktur
 
