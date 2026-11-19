@@ -1,4 +1,4 @@
-export type ViewName = 'bookmarks' | 'reorder' | 'settings' | 'pin';
+export type ViewName = 'bookmarks' | 'labels' | 'reorder' | 'settings' | 'pin';
 
 export interface View {
   root: HTMLElement;

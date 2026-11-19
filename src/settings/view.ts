@@ -1,6 +1,6 @@
 import { messages } from '../i18n';
-import { parseBookmarks, serializeBookmarks } from '../bookmarks/model';
-import type { Bookmark } from '../bookmarks/model';
+import { mergeLibrary, parseLibrary, serializeLibrary } from '../bookmarks/model';
+import type { Library } from '../bookmarks/model';
 import type { BookmarkStore } from '../bookmarks/store';
 import { element } from '../dom';
 import type { PinControls } from '../pin/view';
@@ -23,7 +23,7 @@ export function initSettings({ store, pin, notify, clearLanguage }: Options): Vi
   let purgeVersion = 0;
 
   function exportBookmarks(): void {
-    const output = serializeBookmarks(store.items);
+    const output = serializeLibrary(store.data);
     const objectUrl = URL.createObjectURL(new Blob([output], { type: 'application/json' }));
     const link = document.createElement('a');
     link.href = objectUrl;
@@ -40,21 +40,22 @@ export function initSettings({ store, pin, notify, clearLanguage }: Options): Vi
     if (!file) return;
 
     const version = purgeVersion;
-    let entries: Bookmark[];
+    let entries: Library;
     try {
-      entries = parseBookmarks(await file.text());
+      entries = parseLibrary(JSON.parse(await file.text()));
     } catch {
       notify(messages().importFailed);
       return;
     }
     if (version !== purgeVersion) return;
-    const knownIds = new Set(store.items.map(({ id }) => id));
-    const fresh = entries.filter(({ id }) => !knownIds.has(id));
-    if (!fresh.length) {
-      notify(messages().noNewBookmarks);
+    const merged = mergeLibrary(store.data, entries);
+    const added = merged.bookmarks.length - store.data.bookmarks.length;
+    const addedLabels = merged.labels.length - store.data.labels.length;
+    if (!added && !addedLabels) {
+      notify(messages().nothingToImport);
       return;
     }
-    if (store.save([...fresh, ...store.items])) notify(messages().imported(fresh.length));
+    if (store.save(merged)) notify(messages().imported(added, addedLabels));
   }
 
   function purgeData(): void {
