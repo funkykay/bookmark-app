@@ -32,6 +32,7 @@ export function initBookmarks({ store, pin }: Options): View {
   const emptyAdd = element('emptyAdd', 'button');
 
   const lockButton = element('lockButton', 'button');
+  const desktopLock = element('desktopLock', 'button');
   const menu = element('popup', 'div');
   const menuButton = element('menuButton', 'button');
 
@@ -62,6 +63,7 @@ export function initBookmarks({ store, pin }: Options): View {
 
   function render(): void {
     lockButton.hidden = !pin.enabled;
+    desktopLock.hidden = !pin.enabled;
     const previousFilter = labelFilter.value;
     labels = new Map(store.data.labels.map(label => [label.id, label]));
     const used = new Set(store.data.bookmarks.flatMap(bookmark => bookmark.labelIds));
@@ -160,6 +162,7 @@ export function initBookmarks({ store, pin }: Options): View {
   }
 
   lockButton.addEventListener('click', pin.lock);
+  desktopLock.addEventListener('click', pin.lock);
   element('editorForm', 'form').addEventListener('submit', saveEditor);
   element('cancelButton', 'button').addEventListener('click', () => editor.close());
   editor.addEventListener('click', (event) => { if (event.target === editor) editor.close(); });

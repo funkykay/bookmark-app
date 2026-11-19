@@ -26,6 +26,14 @@ export const legalDe = {
 };
 
 export const de = {
+  navigation: 'Hauptnavigation',
+  mobileWidth: 'Breite der mobilen Ansicht',
+  mobileWidthHint: 'Weiter rechts bleibt die mobile Ansicht auch in breiteren Fenstern aktiv.',
+  alwaysDesktop: 'Immer Desktop',
+  defaultWidth: 'Standard',
+  alwaysMobile: 'Immer mobil',
+  narrowMobile: 'Mobile Ansicht bis zu einer schmaleren Fensterbreite',
+  wideMobile: 'Mobile Ansicht bis zu einer größeren Fensterbreite',
   bookmarks: 'Lesezeichen',
   moreOptions: 'Weitere Optionen',
   reorder: 'Reihenfolge ändern',

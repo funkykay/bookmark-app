@@ -9,10 +9,11 @@ Eine kleine Web-App, mit der du deine Lieblingslinks direkt im Browser sammeln u
 - Lesezeichen hinzufügen, öffnen, bearbeiten und löschen
 - Nach Namen oder URL suchen
 - Mehrere Labels pro Lesezeichen vergeben und die Liste nach einem Label filtern
-- Neue Labels direkt im Lesezeichen eingeben. Unter **⋯ → Labels** lassen sich Labels anlegen, umbenennen, einfärben und löschen.
+- Neue Labels direkt im Lesezeichen eingeben. In der Desktopnavigation unter **Labels** und mobil unter **⋯ → Labels** lassen sich Labels anlegen, umbenennen, einfärben und löschen.
 - Die Reihenfolge per Ziehen oder mit den Pfeiltasten ändern
 - Unter **Einstellungen → Daten** Lesezeichen als JSON-Datei importieren und exportieren oder alle lokalen App-Daten einschließlich PIN-Schutz löschen
 - Unter **Einstellungen → Sprache** zwischen Deutsch und Englisch wechseln. Die gespeicherte Auswahl hat Vorrang. Ohne Auswahl startet die App bei deutscher Browsersprache (etwa `de-AT` oder `de-CH`) auf Deutsch, sonst auf Englisch.
+- Breite Fenster zeigen eine Desktopansicht mit direkter Navigation und mehrspaltigen Lesezeichenkarten. Unter **Einstellungen → Darstellung → Breite der mobilen Ansicht** legst du fest, wie lange die mobile Liste aktiv bleibt. Der Regler rastet bei **Immer Desktop**, **Standard** und **Immer mobil** leicht ein.
 - Die Oberfläche optional mit einer PIN sperren
 
 Die App speichert deine Lesezeichen und PIN-Einstellungen im Browser (`localStorage`). Zum Übertragen deiner Lesezeichen auf ein anderes Gerät oder an einen anderen Speicherort verwende den JSON-Export und -Import. Auch mit aktivierter PIN bleiben die gespeicherten Lesezeichen im Klartext.

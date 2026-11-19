@@ -10,21 +10,34 @@
   <title data-i18n="bookmarks"></title>
 </head>
 <body>
+  <nav id="desktopNav" class="desktop-nav" data-i18n-aria-label="navigation" hidden>
+    <div class="desktop-nav-inner">
+      <button type="button" data-view="bookmarks">
+        <svg class="app-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="currentColor"/><path d="M10 7h12v19l-6-4-6 4z" fill="var(--on-accent)"/></svg>
+        <span data-i18n="bookmarks"></span>
+      </button>
+      <button type="button" data-view="labels" data-i18n="labels"></button>
+      <button type="button" data-view="reorder" data-i18n="reorder"></button>
+      <button type="button" data-view="settings" data-i18n="settings"></button>
+    </div>
+  </nav>
   <main id="bookmarksView" class="app" aria-labelledby="bookmarksTitle" hidden>
     <header>
       <h1 id="bookmarksTitle" tabindex="-1" data-i18n="bookmarks"></h1>
       <div class="actions">
+        <button id="desktopLock" class="desktop-only done-button" type="button" hidden data-i18n="lockNow"></button>
         <button id="menuButton" class="icon-button" type="button" data-i18n-aria-label="moreOptions" aria-controls="popup" aria-expanded="false">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>
         </button>
         <div id="popup" class="popup" hidden>
-          <button id="reorderButton" type="button" data-i18n="reorder"></button>
-          <button id="labelsButton" type="button" data-i18n="labels"></button>
-          <button id="settingsButton" type="button" data-i18n="settings"></button>
+          <button id="reorderButton" data-view="reorder" type="button" data-i18n="reorder"></button>
+          <button id="labelsButton" data-view="labels" type="button" data-i18n="labels"></button>
+          <button id="settingsButton" data-view="settings" type="button" data-i18n="settings"></button>
           <button id="lockButton" type="button" hidden data-i18n="lockNow"></button>
         </div>
         <button id="addButton" class="icon-button primary" type="button" data-i18n-aria-label="addBookmark">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          <span class="desktop-only" data-i18n="addBookmark"></span>
         </button>
       </div>
     </header>
@@ -53,7 +66,7 @@
   <main id="reorderView" class="app" aria-labelledby="reorderTitle" hidden>
     <header>
       <h1 id="reorderTitle" tabindex="-1" data-i18n="reorder"></h1>
-      <button id="doneReorderButton" class="done-button" type="button" data-i18n="done"></button>
+      <button id="doneReorderButton" data-view="bookmarks" class="done-button" type="button" data-i18n="done"></button>
     </header>
     <ul id="reorderList" class="bookmarks" role="list"></ul>
     <span id="reorderAnnouncer" class="sr-only" role="status" aria-live="polite"></span>
@@ -92,7 +105,7 @@
         <button id="newLabel" class="icon-button primary" type="button" data-i18n-aria-label="addLabel">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
         </button>
-        <button id="backFromLabels" class="done-button" type="button" data-i18n="done"></button>
+        <button id="backFromLabels" data-view="bookmarks" class="done-button" type="button" data-i18n="done"></button>
       </div>
     </header>
     <ul id="managedLabels" class="bookmarks" role="list"></ul>
@@ -116,7 +129,7 @@
   <main id="settingsView" class="app" aria-labelledby="settingsTitle" hidden>
     <header>
       <h1 id="settingsTitle" tabindex="-1" data-i18n="settings"></h1>
-      <button id="backFromSettings" class="done-button" type="button" data-i18n="back"></button>
+      <button id="backFromSettings" data-view="bookmarks" class="done-button" type="button" data-i18n="back"></button>
     </header>
     <section class="settings-group" aria-labelledby="languageTitle">
       <h2 id="languageTitle" data-i18n="language"></h2>
@@ -142,6 +155,16 @@
             <label><input class="sr-only" type="radio" name="palette" value="glacier" checked><span class="swatch glacier" data-i18n="glacier"></span></label>
             <label><input class="sr-only" type="radio" name="palette" value="lagoon"><span class="swatch lagoon" data-i18n="lagoon"></span></label>
             <label><input class="sr-only" type="radio" name="palette" value="sunset"><span class="swatch sunset" data-i18n="sunset"></span></label>
+          </div>
+        </fieldset>
+        <fieldset class="layout-control">
+          <legend><label for="mobileWidth" data-i18n="mobileWidth"></label></legend>
+          <p id="mobileWidthHint" data-i18n="mobileWidthHint"></p>
+          <input id="mobileWidth" type="range" min="0" max="100" step="1" value="50" aria-describedby="mobileWidthHint">
+          <div class="range-labels" aria-hidden="true">
+            <span data-i18n="alwaysDesktop"></span>
+            <span data-i18n="defaultWidth"></span>
+            <span data-i18n="alwaysMobile"></span>
           </div>
         </fieldset>
       </form>

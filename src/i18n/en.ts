@@ -28,6 +28,14 @@ export const legalEn = {
 } satisfies typeof legalDe;
 
 export const en = {
+  navigation: 'Main navigation',
+  mobileWidth: 'Mobile view width',
+  mobileWidthHint: 'Move right to keep the mobile view active in wider windows.',
+  alwaysDesktop: 'Always desktop',
+  defaultWidth: 'Default',
+  alwaysMobile: 'Always mobile',
+  narrowMobile: 'Mobile view up to a narrower window width',
+  wideMobile: 'Mobile view up to a wider window width',
   bookmarks: 'Bookmarks',
   moreOptions: 'More options',
   reorder: 'Reorder bookmarks',

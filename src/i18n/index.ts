@@ -37,7 +37,7 @@ export function applyLanguage(next: Language): void {
   const catalog: Messages & Partial<typeof legalDe> = __LEGAL_PAGES__
     ? { ...messages(), ...legalMessages() }
     : messages();
-  for (const attribute of ['textContent', 'placeholder', 'aria-label']) {
+  for (const attribute of ['textContent', 'placeholder', 'aria-label', 'aria-valuetext']) {
     const binding = attribute === 'textContent' ? 'data-i18n' : `data-i18n-${attribute}`;
     for (const node of document.querySelectorAll(`[${binding}]`)) {
       const key = node.getAttribute(binding) as keyof typeof catalog;

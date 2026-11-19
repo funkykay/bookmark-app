@@ -1,5 +1,6 @@
 import { messages } from '../i18n';
 import { element } from '../dom';
+import { initLayout } from './layout';
 
 const storageKey = 'donni-bookmark-darstellung';
 
@@ -7,6 +8,8 @@ export function initAppearance(notify: (message: string) => void) {
   const form = element('appearanceForm', 'form');
   const mode = form.elements.namedItem('mode') as RadioNodeList;
   const palette = form.elements.namedItem('palette') as RadioNodeList;
+  const mobileWidth = element('mobileWidth', 'input');
+  const setPosition = initLayout(mobileWidth);
   const browserColor = element('themeColor', 'meta');
   const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
 
@@ -23,16 +26,18 @@ export function initAppearance(notify: (message: string) => void) {
       const saved = JSON.parse(localStorage.getItem(storageKey) ?? 'null');
       if (typeof saved?.mode === 'string') mode.value = saved.mode;
       if (typeof saved?.palette === 'string') palette.value = saved.palette;
+      setPosition(saved?.mobileWidth);
     } catch {
-      // Keep the form defaults when storage is unavailable or unreadable.
+      setPosition(undefined);
     }
     apply();
   }
 
   form.addEventListener('change', () => {
+    setPosition(mobileWidth.valueAsNumber);
     apply();
     try {
-      localStorage.setItem(storageKey, JSON.stringify({ mode: mode.value, palette: palette.value }));
+      localStorage.setItem(storageKey, JSON.stringify({ mode: mode.value, palette: palette.value, mobileWidth: mobileWidth.valueAsNumber }));
     } catch {
       notify(messages().appearanceSession);
     }
@@ -51,6 +56,7 @@ export function initAppearance(notify: (message: string) => void) {
       return false;
     }
     form.reset();
+    setPosition(undefined);
     apply();
     return true;
   };

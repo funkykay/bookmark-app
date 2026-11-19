@@ -54,12 +54,6 @@ function startApp() {
     pin: pin.view,
   });
 
-  element('labelsButton', 'button').addEventListener('click', () => navigation.show('labels'));
-  element('backFromLabels', 'button').addEventListener('click', () => navigation.show('bookmarks'));
-  element('settingsButton', 'button').addEventListener('click', () => navigation.show('settings'));
-  element('reorderButton', 'button').addEventListener('click', () => navigation.show('reorder'));
-  element('doneReorderButton', 'button').addEventListener('click', () => navigation.show('bookmarks'));
-  element('backFromSettings', 'button').addEventListener('click', () => navigation.show('bookmarks'));
   settings.root.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') navigation.show('bookmarks');
   });
