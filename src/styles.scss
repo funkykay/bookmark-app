@@ -836,6 +836,7 @@ h2 {
   }
 }
 
+.settings-hint,
 .pin-protection-hint,
 .pin-unavailable {
   margin: 0;
@@ -860,6 +861,10 @@ h2 {
 
   &.danger {
     color: var(--danger);
+  }
+
+  &:disabled {
+    color: var(--muted);
   }
 }
 

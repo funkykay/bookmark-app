@@ -3,20 +3,24 @@ import { parseLibrary, serializeLibrary } from './model';
 import type { Library } from './model';
 import { storage } from '../storage';
 
+function readStoredLibrary(): { data: Library; version: number | null } {
+  const stored = storage.read('bookmarks');
+  if (stored === null) return { data: { bookmarks: [], labels: [] }, version: null };
+  const saved = JSON.parse(stored);
+  return { data: parseLibrary(saved), version: saved.version };
+}
+
 export function createBookmarkStore(notify: (message: string) => void, onChange: () => void) {
   let data: Library = { bookmarks: [], labels: [] };
   let loadFailed = false;
   try {
-    const stored = storage.read('bookmarks');
-    if (stored !== null) {
-      const saved = JSON.parse(stored);
-      data = parseLibrary(saved);
-      if (saved.version === 2) {
-        try {
-          storage.write('bookmarks', serializeLibrary(data));
-        } catch {
-          notify(messages().saveFailed);
-        }
+    const stored = readStoredLibrary();
+    data = stored.data;
+    if (stored.version === 2) {
+      try {
+        storage.write('bookmarks', serializeLibrary(data));
+      } catch {
+        notify(messages().saveFailed);
       }
     }
   } catch {
@@ -40,6 +44,7 @@ export function createBookmarkStore(notify: (message: string) => void, onChange:
 
   return {
     get data(): Library { return data; },
+    exportBackup(): string { return serializeLibrary(readStoredLibrary().data); },
     save(next: Library): boolean {
       if (loadFailed) {
         notify(messages().loadFailed);

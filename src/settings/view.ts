@@ -1,9 +1,10 @@
 import { messages } from '../i18n';
-import { mergeLibrary, parseLibrary, serializeLibrary } from '../bookmarks/model';
+import { mergeLibrary, parseLibrary } from '../bookmarks/model';
 import type { Library } from '../bookmarks/model';
 import type { BookmarkStore } from '../bookmarks/store';
 import { element } from '../dom';
 import type { PinControls } from '../pin/view';
+import { storage } from '../storage';
 import type { View } from '../views';
 import { initAppearance } from './appearance';
 
@@ -14,24 +15,47 @@ interface Options {
   notify: (message: string) => void;
 }
 
+function filenameTimestamp(date: Date): string {
+  const pad = (value: number) => String(value).padStart(2, '0');
+  const day = [date.getFullYear(), pad(date.getMonth() + 1), pad(date.getDate())].join('-');
+  const time = [date.getHours(), date.getMinutes(), date.getSeconds()].map(pad).join('-');
+  return `${day}_${time}`;
+}
+
 export function initSettings({ store, pin, notify, clearLanguage }: Options): View {
   const clearAppearance = initAppearance(notify);
   const pinSwitch = element('pinSwitch', 'button');
   const changeButton = element('changePinButton', 'button');
 
   const importFile = element('importFile', 'input');
+  const purgeButton = element('purgeButton', 'button');
+  const purgeHint = element('purgeHint', 'p');
   let purgeVersion = 0;
 
   function exportBookmarks(): void {
-    const output = serializeLibrary(store.data);
+    const exportedAt = new Date();
+    let lastChange: string | null;
+    let output: string;
+    try {
+      lastChange = storage.lastChange();
+      output = store.exportBackup();
+    } catch {
+      notify(messages().loadFailed);
+      return;
+    }
     const objectUrl = URL.createObjectURL(new Blob([output], { type: 'application/json' }));
     const link = document.createElement('a');
     link.href = objectUrl;
-    link.download = messages().backupFilename;
+    link.download = messages().backupFilename(filenameTimestamp(exportedAt));
     document.body.append(link);
     link.click();
     link.remove();
     window.setTimeout(() => URL.revokeObjectURL(objectUrl), 30_000);
+    try {
+      storage.recordExport(exportedAt, lastChange);
+    } catch {
+      notify(messages().saveFailed);
+    }
   }
 
   async function importBookmarks(): Promise<void> {
@@ -59,14 +83,28 @@ export function initSettings({ store, pin, notify, clearLanguage }: Options): Vi
   }
 
   function purgeData(): void {
-    if (!window.confirm(messages().confirmPurge)) return;
+    if (!storage.hasCurrentBackup() || !window.confirm(messages().confirmPurge)) return;
+    // Another tab may have saved changes while the confirmation was open.
+    if (!storage.hasCurrentBackup()) return;
     purgeVersion++;
     if (!store.clear() || !pin.clearSettings() || !clearAppearance() || !clearLanguage()) return;
+    try {
+      storage.clearBackupHistory();
+    } catch {
+      notify(messages().saveFailed);
+      return;
+    }
     render();
     notify(messages().purged);
   }
 
+  function updatePurgeButton(): void {
+    purgeButton.disabled = !storage.hasCurrentBackup();
+    purgeHint.hidden = !purgeButton.disabled;
+  }
+
   function render(): void {
+    updatePurgeButton();
     pinSwitch.setAttribute('aria-checked', String(pin.enabled));
     changeButton.hidden = !pin.enabled;
   }
@@ -79,7 +117,8 @@ export function initSettings({ store, pin, notify, clearLanguage }: Options): Vi
   element('exportButton', 'button').addEventListener('click', exportBookmarks);
   element('importButton', 'button').addEventListener('click', () => importFile.click());
   importFile.addEventListener('change', importBookmarks);
-  element('purgeButton', 'button').addEventListener('click', purgeData);
+  purgeButton.addEventListener('click', purgeData);
+  storage.onBackupChange(updatePurgeButton);
 
   return {
     root: element('settingsView', 'main'),

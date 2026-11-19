@@ -176,7 +176,8 @@
       <button id="importButton" class="settings-action" type="button" data-i18n="importBookmarks"></button>
       <input id="importFile" type="file" accept=".json,application/json" hidden>
       <button id="exportButton" class="settings-action" type="button" data-i18n="exportBookmarks"></button>
-      <button id="purgeButton" class="settings-action danger" type="button" data-i18n="purge"></button>
+      <button id="purgeButton" class="settings-action danger" type="button" disabled aria-describedby="purgeHint" data-i18n="purge"></button>
+      <p id="purgeHint" class="settings-hint" data-i18n="purgeHint"></p>
     </section>
     <section class="settings-group" aria-labelledby="aboutTitle">
       <h2 id="aboutTitle" data-i18n="aboutApp"></h2>
