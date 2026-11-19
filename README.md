@@ -2,7 +2,7 @@
 
 Eine kleine Web-App, mit der du deine Lieblingslinks direkt im Browser sammeln und verwalten kannst.
 
-[Live-Demo auf bookmarks.kaydonner.de](https://bookmarks.kaydonner.de/)
+[Live-Demo auf funkykay.github.io/bookmark-app](https://funkykay.github.io/bookmark-app)
 
 ## Funktionen
 
