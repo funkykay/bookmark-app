@@ -26,9 +26,18 @@
       </div>
     </header>
 
-    <div class="search">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7"/><path d="m16 16 5 5"/></svg>
-      <input id="search" type="search" data-i18n-placeholder="search" autocomplete="off" data-i18n-aria-label="searchBookmarks">
+    <div class="search-row">
+      <div class="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7"/><path d="m16 16 5 5"/></svg>
+        <input id="search" type="search" data-i18n-placeholder="search" autocomplete="off" data-i18n-aria-label="searchBookmarks">
+      </div>
+      <div class="icon-button sort-control">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h12M3 11h8M3 16h4M17 9v11m-4-4 4 4 4-4"/></svg>
+        <select id="sortOrder" data-i18n-aria-label="sortBookmarks">
+          <option value="custom" data-i18n="customOrder" selected></option>
+          <option value="updated" data-i18n="lastUpdated"></option>
+        </select>
+      </div>
     </div>
     <ul id="list" class="bookmarks" role="list"></ul>
     <div id="empty" class="empty" hidden>

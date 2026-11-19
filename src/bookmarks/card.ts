@@ -7,7 +7,9 @@ const tiles = [
   ['#f0e8fa', '#8252aa'], ['#fce7ec', '#bd526f'], ['#e6f1f7', '#417e9d'],
 ] as const;
 
-export function createBookmarkCard(bookmark: Bookmark, content: HTMLAnchorElement | HTMLDivElement, action: HTMLButtonElement): HTMLLIElement {
+export function createBookmarkCard(
+  bookmark: Bookmark, content: HTMLAnchorElement | HTMLDivElement, action: HTMLButtonElement, updatedDate?: string,
+): HTMLLIElement {
   const { id, name, url } = bookmark;
   const domain = hostname(url);
   const card = document.createElement('li');
@@ -37,7 +39,19 @@ export function createBookmarkCard(bookmark: Bookmark, content: HTMLAnchorElemen
   const subtitle = document.createElement('span');
   subtitle.className = 'domain';
   subtitle.textContent = domain;
-  detail.append(title, subtitle);
+  const metadata = document.createElement('span');
+  metadata.className = 'bookmark-meta';
+  metadata.append(subtitle);
+  if (updatedDate) {
+    const time = document.createElement('time');
+    time.dateTime = bookmark.updated;
+    time.textContent = updatedDate;
+    time.title = `${messages().lastUpdated}: ${updatedDate}`;
+    time.id = `updated-${id}`;
+    metadata.append(time);
+    content.setAttribute('aria-describedby', time.id);
+  }
+  detail.append(title, metadata);
   content.append(glyph, detail);
 
   card.append(content, action);
