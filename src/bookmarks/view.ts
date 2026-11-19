@@ -15,6 +15,7 @@ interface Options {
 }
 
 export function initBookmarks({ store, pin }: Options): View {
+  const root = element('bookmarksView', 'main');
   const list = element('list', 'ul');
   const search = element('search', 'input');
   const labelFilter = element('labelFilter', 'select');
@@ -152,10 +153,21 @@ export function initBookmarks({ store, pin }: Options): View {
   element('desktopAdd', 'button').addEventListener('click', () => openEditor());
   emptyAdd.addEventListener('click', () => openEditor());
   search.addEventListener('input', renderList);
+  document.addEventListener('keydown', (event) => {
+    if (root.hidden || document.documentElement.dataset.layout !== 'desktop' || editor.open || !menu.hidden) return;
+    if (event.defaultPrevented || event.isComposing || event.metaKey) return;
+    if ((event.ctrlKey || event.altKey) && !event.getModifierState('AltGraph')) return;
+    if (event.key === ' ' || (event.key !== 'Dead' && [...event.key].length !== 1)) return;
+    if (event.target instanceof HTMLElement &&
+        (event.target.isContentEditable || event.target.closest('input, textarea, select'))) return;
+
+    // Focus before the browser inserts the character so typing uses the normal input event.
+    search.focus();
+  });
   labelFilter.addEventListener('change', renderList);
 
   return {
-    root: element('bookmarksView', 'main'),
+    root,
     render,
     leave() {
       closeMenu();
