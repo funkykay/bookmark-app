@@ -1,5 +1,4 @@
-export const de = {
-  bookmarks: 'Lesezeichen',
+export const legalDe = {
   imprint: 'Impressum',
   privacy: 'Datenschutzerklärung',
   backToApp: 'Zur App',
@@ -24,6 +23,10 @@ export const de = {
   objection: 'Beruht die Verarbeitung auf einem berechtigten Interesse, kannst du ihr aus Gründen widersprechen, die sich aus deiner besonderen Situation ergeben (Art. 21 Abs. 1 DSGVO). Wende dich dazu direkt an mich.',
   complaint: 'Du kannst dich bei einer Datenschutzaufsichtsbehörde beschweren (Art. 77 DSGVO), zum Beispiel an deinem Wohnort oder in Niedersachsen.',
   authority: 'Landesbeauftragter für den Datenschutz Niedersachsen',
+};
+
+export const de = {
+  bookmarks: 'Lesezeichen',
   moreOptions: 'Weitere Optionen',
   reorder: 'Reihenfolge ändern',
   settings: 'Einstellungen',

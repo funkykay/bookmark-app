@@ -1,7 +1,6 @@
-import type { Messages } from './de';
+import type { legalDe, Messages } from './de';
 
-export const en = {
-  bookmarks: 'Bookmarks',
+export const legalEn = {
   imprint: 'Legal notice',
   privacy: 'Privacy policy',
   backToApp: 'Back to the app',
@@ -26,6 +25,10 @@ export const en = {
   objection: 'Where processing is based on a legitimate interest, you can object on grounds relating to your particular situation (Article 21(1) GDPR). Please contact me directly to exercise this right.',
   complaint: 'You can lodge a complaint with a data protection authority (Article 77 GDPR), for example where you live or in Lower Saxony.',
   authority: 'State Commissioner for Data Protection of Lower Saxony',
+} satisfies typeof legalDe;
+
+export const en = {
+  bookmarks: 'Bookmarks',
   moreOptions: 'More options',
   reorder: 'Reorder bookmarks',
   settings: 'Settings',

@@ -6,7 +6,7 @@ import { initLabels } from './labels/view';
 import { initPin } from './pin/view';
 import { initReorder } from './reorder/view';
 import { initAppearance } from './settings/appearance';
-import { messages } from './i18n';
+import { legalMessages, messages } from './i18n';
 import { initLanguage } from './settings/language';
 import { initSettings } from './settings/view';
 import { createNavigation } from './views';
@@ -14,19 +14,22 @@ import type { ViewName } from './views';
 
 const notify = createToast();
 const clearLanguage = initLanguage(notify);
-const page = new URLSearchParams(location.search).get('seite');
 
-if (page === 'impressum' || page === 'datenschutz') {
+if (!__LEGAL_PAGES__ || !showLegalPage()) startApp();
+
+function showLegalPage(): boolean {
+  const page = new URLSearchParams(location.search).get('seite');
+  if (page !== 'impressum' && page !== 'datenschutz') return false;
   initAppearance(notify);
   const privacy = page === 'datenschutz';
-  const title = privacy ? messages().privacy : messages().imprint;
+  const legal = legalMessages();
+  const title = privacy ? legal.privacy : legal.imprint;
   document.title = `${title} · ${messages().bookmarks}`;
   element('legalTitle', 'h1').textContent = title;
-  element('operatorRole', 'h2').textContent = privacy ? messages().controller : messages().provider;
+  element('operatorRole', 'h2').textContent = privacy ? legal.controller : legal.provider;
   element('privacyContent', 'div').hidden = !privacy;
   element('legalView', 'main').hidden = false;
-} else {
-  startApp();
+  return true;
 }
 
 function startApp() {
