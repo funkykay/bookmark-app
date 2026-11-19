@@ -946,7 +946,8 @@ body:has(.pin-gate:not([hidden])) {
   font-weight: 700;
 }
 
-.sr-only {
+.sr-only,
+:root[data-layout="desktop"] #bookmarksTitle {
   position: absolute;
   width: 1px;
   height: 1px;
