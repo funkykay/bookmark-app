@@ -1,13 +1,12 @@
 import { element } from '../dom';
 import { applyLanguage, isLanguage, languageForLocale, messages } from '../i18n';
-
-const storageKey = 'donni-bookmark-language';
+import { storage } from '../storage';
 
 export function initLanguage(notify: (message: string) => void) {
   const select = element('languageSelect', 'select');
   let saved: string | null = null;
   try {
-    saved = localStorage.getItem(storageKey);
+    saved = storage.read('language');
   } catch {
     // The language can still be changed for the current session.
   }
@@ -23,7 +22,7 @@ export function initLanguage(notify: (message: string) => void) {
     if (!isLanguage(next)) return;
     applyLanguage(next);
     try {
-      localStorage.setItem(storageKey, next);
+      storage.write('language', next);
     } catch {
       notify(messages().languageSession);
     }
@@ -31,7 +30,7 @@ export function initLanguage(notify: (message: string) => void) {
 
   return function clearLanguage(): boolean {
     try {
-      localStorage.removeItem(storageKey);
+      storage.remove('language');
     } catch {
       notify(messages().languageResetFailed);
       return false;

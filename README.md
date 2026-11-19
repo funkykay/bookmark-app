@@ -49,7 +49,8 @@ Der Build erzeugt eine einzelne Datei, `dist/index.html`. Sie enthält die Style
 - `index.html` enthält das Seiten-Markup mit Übersetzungsschlüsseln und ist der Einstiegspunkt für Vite.
 - `src/i18n/` enthält die beiden typgeprüften Sprachkataloge. Statische Texte und Attribute verwenden `data-i18n`-Bindungen, dynamische Texte kommen über `messages()` aus dem aktiven Katalog. Beide Sprachen sind im Offline-Build enthalten.
 - `src/main.ts` registriert die Ansichten. `src/views.ts` wechselt die sichtbare Ansicht und setzt den Tastaturfokus auf ihre Überschrift.
-- `src/bookmarks/` enthält die Lesezeichenansicht, die Validierung und den lokalen Speicher.
+- `src/storage.ts` definiert die synchrone Schnittstelle `AppStorage`. Für ein anderes Speicher-Backend lässt sich dort die exportierte Implementierung `storage` austauschen. Der Local-Storage-Adapter ordnet die vier App-Einträge ihren Browser-Schlüsseln zu und meldet Änderungen aus anderen Tabs.
+- `src/bookmarks/` enthält die Lesezeichenansicht, die Validierung und die Verwaltung der Lesezeichendaten.
 - `src/labels/` enthält die Label-Verwaltung und die Mehrfachauswahl im Lesezeichen-Editor.
 - `src/settings/view.ts` enthält die Einstellungen für PIN-Schutz und Datenverwaltung.
 - `src/pin/` enthält die PIN-Oberfläche und verwendet Web Crypto für die PIN-Prüfung.

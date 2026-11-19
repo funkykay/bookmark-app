@@ -1,8 +1,7 @@
 import { messages } from '../i18n';
 import { element } from '../dom';
 import { initLayout } from './layout';
-
-const storageKey = 'donni-bookmark-darstellung';
+import { storage } from '../storage';
 
 export function initAppearance(notify: (message: string) => void) {
   const form = element('appearanceForm', 'form');
@@ -23,7 +22,7 @@ export function initAppearance(notify: (message: string) => void) {
   function restore() {
     form.reset();
     try {
-      const saved = JSON.parse(localStorage.getItem(storageKey) ?? 'null');
+      const saved = JSON.parse(storage.read('appearance') ?? 'null');
       if (typeof saved?.mode === 'string') mode.value = saved.mode;
       if (typeof saved?.palette === 'string') palette.value = saved.palette;
       setPosition(saved?.mobileWidth);
@@ -37,20 +36,18 @@ export function initAppearance(notify: (message: string) => void) {
     setPosition(mobileWidth.valueAsNumber);
     apply();
     try {
-      localStorage.setItem(storageKey, JSON.stringify({ mode: mode.value, palette: palette.value, mobileWidth: mobileWidth.valueAsNumber }));
+      storage.write('appearance', JSON.stringify({ mode: mode.value, palette: palette.value, mobileWidth: mobileWidth.valueAsNumber }));
     } catch {
       notify(messages().appearanceSession);
     }
   });
   systemDark.addEventListener('change', apply);
-  window.addEventListener('storage', event => {
-    if (event.key === storageKey || event.key === null) restore();
-  });
+  storage.onExternalChange('appearance', restore);
   restore();
 
   return function clearAppearance(): boolean {
     try {
-      localStorage.removeItem(storageKey);
+      storage.remove('appearance');
     } catch {
       notify(messages().appearanceResetFailed);
       return false;

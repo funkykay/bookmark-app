@@ -1,3 +1,5 @@
+import { storage } from '../storage';
+
 export interface PinSettings {
   salt: string;
   hash: string;
@@ -5,7 +7,6 @@ export interface PinSettings {
   lockUntil: number;
 }
 
-const storageKey = 'donni-bookmark-pin';
 const iterations = 600_000;
 
 function toHex(bytes: Uint8Array): string {
@@ -30,7 +31,7 @@ export async function matchesPin(pin: string, settings: PinSettings): Promise<bo
 
 export function loadPinSettings(): PinSettings | null {
   try {
-    const stored = localStorage.getItem(storageKey);
+    const stored = storage.read('pin');
     if (stored === null) return null;
 
     const item: unknown = JSON.parse(stored);
@@ -49,6 +50,6 @@ export function loadPinSettings(): PinSettings | null {
 }
 
 export function savePinSettings(settings: PinSettings | null): void {
-  if (settings) localStorage.setItem(storageKey, JSON.stringify(settings));
-  else localStorage.removeItem(storageKey);
+  if (settings) storage.write('pin', JSON.stringify(settings));
+  else storage.remove('pin');
 }
