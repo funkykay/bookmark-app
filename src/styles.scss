@@ -806,18 +806,19 @@ h2 {
   }
 }
 
+body:has(.pin-gate:not([hidden])) {
+  display: flex;
+  flex-direction: column;
+}
+
 .pin-gate {
-  position: fixed;
-  z-index: 30;
-  inset: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  display: grid;
+  flex: 1;
   background: var(--bg);
   touch-action: manipulation;
 }
 
 .pin-gate-inner {
-  min-height: 100%;
   width: min(100%, 395px);
   margin: auto;
   padding: max(26px, env(safe-area-inset-top)) 22px max(22px, env(safe-area-inset-bottom));

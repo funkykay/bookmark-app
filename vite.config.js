@@ -1,13 +1,23 @@
 import { defineConfig } from 'vite';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   base: './',
+  define: { __LEGAL_PAGES__: mode !== 'release' },
   build: {
     modulePreload: false,
     assetsInlineLimit: () => true,
     rolldownOptions: { output: { codeSplitting: false } },
   },
   plugins: [{
+    name: 'legal-pages',
+    transformIndexHtml: {
+      order: 'pre',
+      handler(html) {
+        return html.replace(/<!-- legal-pages:start -->([\s\S]*?)<!-- legal-pages:end -->/g,
+          mode === 'release' ? '' : '$1');
+      },
+    },
+  }, {
     name: 'standalone-html',
     apply: 'build',
     generateBundle: {
@@ -29,4 +39,4 @@ export default defineConfig({
       },
     },
   }],
-});
+}));

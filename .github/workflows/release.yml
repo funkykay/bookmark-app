@@ -1,0 +1,43 @@
+name: Release HTML
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:release
+      - name: Check release HTML
+        run: |
+          test -s dist/index.html
+          if grep -Eiq 'legalView|legal-links|impressum|datenschutz|legal notice|privacy policy|kaydonner\.de' dist/index.html; then
+            echo 'Die Release-Datei enthält Inhalte der Rechtstexte.' >&2
+            exit 1
+          fi
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="build-${GITHUB_RUN_NUMBER}"
+          if draft=$(gh release view "$tag" --json isDraft --jq '.isDraft'); then
+            if [[ "$draft" == true ]]; then
+              gh release upload "$tag" dist/index.html --clobber
+              gh release edit "$tag" --draft=false
+            fi
+          else
+            gh release create "$tag" dist/index.html --target "$GITHUB_SHA" \
+              --title "Lesezeichen · Build ${GITHUB_RUN_NUMBER}" --notes "Offline-Version als einzelne HTML-Datei."
+          fi
