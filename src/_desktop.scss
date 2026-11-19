@@ -77,20 +77,8 @@
     margin-bottom: 24px;
 
     .search { flex: 1 1 240px; }
-    .search, .label-filter, .sort-control { height: 42px; border-radius: 9px; }
+    .search, .label-filter { height: 42px; border-radius: 9px; }
     .label-filter { max-width: min(100%, 20rem); }
-    .sort-control { width: auto; }
-    .sort-control svg { display: none; }
-    .sort-control select {
-      position: static;
-      opacity: 1;
-      padding-inline: 10px;
-      border: 0;
-      border-radius: inherit;
-      color: var(--text);
-      background: var(--surface);
-      font-size: 14px;
-    }
   }
 
   #list, #managedLabels {
@@ -112,7 +100,6 @@
     }
 
     .bookmark-title { width: 100%; }
-    .bookmark-meta { flex-wrap: wrap; }
     .edit {
       position: absolute;
       inset: 8px 8px auto auto;

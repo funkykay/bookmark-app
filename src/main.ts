@@ -4,7 +4,6 @@ import { initBookmarks } from './bookmarks/view';
 import { createToast, element } from './dom';
 import { initLabels } from './labels/view';
 import { initPin } from './pin/view';
-import { initReorder } from './reorder/view';
 import { initAppearance } from './settings/appearance';
 import { legalMessages, messages } from './i18n';
 import { initLanguage } from './settings/language';
@@ -48,7 +47,6 @@ function startApp() {
   const settings = initSettings({ store, pin, notify, clearLanguage });
   const navigation = createNavigation({
     bookmarks: initBookmarks({ store, pin }),
-    reorder: initReorder(store),
     labels: initLabels(store),
     settings,
     pin: pin.view,

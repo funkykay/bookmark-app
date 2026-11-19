@@ -17,7 +17,6 @@
         <span data-i18n="bookmarks"></span>
       </button>
       <button type="button" data-view="labels" data-i18n="labels"></button>
-      <button type="button" data-view="reorder" data-i18n="reorder"></button>
       <button type="button" data-view="settings" data-i18n="settings"></button>
     </div>
   </nav>
@@ -30,7 +29,6 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>
         </button>
         <div id="popup" class="popup" hidden>
-          <button id="reorderButton" data-view="reorder" type="button" data-i18n="reorder"></button>
           <button id="labelsButton" data-view="labels" type="button" data-i18n="labels"></button>
           <button id="settingsButton" data-view="settings" type="button" data-i18n="settings"></button>
           <button id="lockButton" type="button" hidden data-i18n="lockNow"></button>
@@ -48,29 +46,12 @@
         <input id="search" type="search" data-i18n-placeholder="search" autocomplete="off" data-i18n-aria-label="searchBookmarks">
       </div>
       <select id="labelFilter" class="label-filter" data-i18n-aria-label="filterByLabel" hidden></select>
-      <div class="icon-button sort-control">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h12M3 11h8M3 16h4M17 9v11m-4-4 4 4 4-4"/></svg>
-        <select id="sortOrder" data-i18n-aria-label="sortBookmarks">
-          <option value="custom" data-i18n="customOrder" selected></option>
-          <option value="updated" data-i18n="lastUpdated"></option>
-        </select>
-      </div>
     </div>
     <ul id="list" class="bookmarks" role="list"></ul>
     <div id="empty" class="empty" hidden>
       <span id="emptyText"></span>
       <button id="emptyAdd" type="button" data-i18n="add"></button>
     </div>
-  </main>
-
-  <main id="reorderView" class="app" aria-labelledby="reorderTitle" hidden>
-    <header>
-      <h1 id="reorderTitle" tabindex="-1" data-i18n="reorder"></h1>
-      <button id="doneReorderButton" data-view="bookmarks" class="done-button" type="button" data-i18n="done"></button>
-    </header>
-    <ul id="reorderList" class="bookmarks" role="list"></ul>
-    <span id="reorderAnnouncer" class="sr-only" role="status" aria-live="polite"></span>
-    <p id="reorderEmpty" class="empty" hidden data-i18n="noBookmarks"></p>
   </main>
 
   <dialog id="editor" aria-labelledby="editorTitle">

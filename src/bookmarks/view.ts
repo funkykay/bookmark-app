@@ -19,7 +19,6 @@ export function initBookmarks({ store, pin }: Options): View {
   const search = element('search', 'input');
   const labelFilter = element('labelFilter', 'select');
   const picker = initLabelPicker();
-  const sortOrder = element('sortOrder', 'select');
   const editor = element('editor', 'dialog');
   const editorTitle = element('editorTitle', 'h2');
   const nameInput = element('nameInput', 'input');
@@ -80,17 +79,9 @@ export function initBookmarks({ store, pin }: Options): View {
     const shown = store.data.bookmarks.filter(({ name, url, labelIds }) =>
       (!selected || labelIds.includes(selected))
       && `${name} ${url}`.toLocaleLowerCase(currentLanguage()).includes(query));
-    const byUpdated = sortOrder.value === 'updated';
-    if (byUpdated) {
-      shown.sort((a, b) => Date.parse(b.updated) - Date.parse(a.updated));
-    }
-    sortOrder.title = sortOrder.selectedOptions[0]?.textContent ?? '';
     const fragment = document.createDocumentFragment();
-    const dates = byUpdated
-      ? new Intl.DateTimeFormat(currentLanguage(), { dateStyle: 'medium', timeStyle: 'short' })
-      : undefined;
     for (const bookmark of shown) {
-      fragment.append(createCard(bookmark, dates?.format(Date.parse(bookmark.updated))));
+      fragment.append(createBookmarkCard(bookmark, labels, openEditor));
     }
     list.replaceChildren(fragment);
 
@@ -98,16 +89,6 @@ export function initBookmarks({ store, pin }: Options): View {
     empty.hidden = shown.length > 0;
     emptyText.textContent = searching ? messages().noResults : messages().noBookmarks;
     emptyAdd.hidden = searching;
-  }
-
-  function createCard(bookmark: Bookmark, updatedDate?: string): HTMLLIElement {
-    const action = document.createElement('button');
-    action.type = 'button';
-    action.className = 'edit';
-    action.setAttribute('aria-label', messages().editNamed(bookmark.name));
-    action.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>';
-    action.addEventListener('click', () => openEditor(bookmark));
-    return createBookmarkCard(bookmark, labels, document.createElement('a'), action, updatedDate);
   }
 
   function openEditor(bookmark?: Bookmark): void {
@@ -171,7 +152,6 @@ export function initBookmarks({ store, pin }: Options): View {
   emptyAdd.addEventListener('click', () => openEditor());
   search.addEventListener('input', renderList);
   labelFilter.addEventListener('change', renderList);
-  sortOrder.addEventListener('change', renderList);
 
   return {
     root: element('bookmarksView', 'main'),

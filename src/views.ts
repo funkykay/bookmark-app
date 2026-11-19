@@ -1,6 +1,6 @@
 import { element } from './dom';
 
-export type ViewName = 'bookmarks' | 'labels' | 'reorder' | 'settings' | 'pin';
+export type ViewName = 'bookmarks' | 'labels' | 'settings' | 'pin';
 
 export interface View {
   root: HTMLElement;

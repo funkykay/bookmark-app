@@ -10,20 +10,18 @@ const tiles = [
 
 export function createBookmarkCard(
   bookmark: Bookmark, labels: ReadonlyMap<string, Label>,
-  content: HTMLAnchorElement | HTMLDivElement, action: HTMLButtonElement, updatedDate?: string,
+  openEditor: (bookmark: Bookmark) => void,
 ): HTMLLIElement {
   const { id, name, url } = bookmark;
   const domain = hostname(url);
   const card = document.createElement('li');
   card.className = 'bookmark';
-  card.dataset.bookmarkId = id;
 
+  const content = document.createElement('a');
   content.className = 'bookmark-content';
-  if (content instanceof HTMLAnchorElement) {
-    content.href = url;
-    content.title = url;
-    content.setAttribute('aria-label', messages().openNamed(name));
-  }
+  content.href = url;
+  content.title = url;
+  content.setAttribute('aria-label', messages().openNamed(name));
 
   const glyph = document.createElement('span');
   glyph.className = 'glyph';
@@ -41,19 +39,7 @@ export function createBookmarkCard(
   const subtitle = document.createElement('span');
   subtitle.className = 'domain';
   subtitle.textContent = domain;
-  const metadata = document.createElement('span');
-  metadata.className = 'bookmark-meta';
-  metadata.append(subtitle);
-  if (updatedDate) {
-    const time = document.createElement('time');
-    time.dateTime = bookmark.updated;
-    time.textContent = updatedDate;
-    time.title = `${messages().lastUpdated}: ${updatedDate}`;
-    time.id = `updated-${id}`;
-    metadata.append(time);
-    content.setAttribute('aria-describedby', time.id);
-  }
-  detail.append(title, metadata);
+  detail.append(title, subtitle);
   if (bookmark.labelIds.length) {
     const badges = document.createElement('span');
     badges.className = 'label-badges';
@@ -62,13 +48,17 @@ export function createBookmarkCard(
       if (label) badges.append(labelBadge(label));
     }
     detail.append(badges);
-    if (content instanceof HTMLAnchorElement) {
-      badges.id = `labels-${id}`;
-      content.setAttribute('aria-describedby', [badges.id, updatedDate && `updated-${id}`].filter(Boolean).join(' '));
-    }
+    badges.id = `labels-${id}`;
+    content.setAttribute('aria-describedby', badges.id);
   }
   content.append(glyph, detail);
 
+  const action = document.createElement('button');
+  action.type = 'button';
+  action.className = 'edit';
+  action.setAttribute('aria-label', messages().editNamed(bookmark.name));
+  action.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>';
+  action.addEventListener('click', () => openEditor(bookmark));
   card.append(content, action);
   return card;
 }

@@ -142,33 +142,6 @@ h1 {
   margin-bottom: 19px;
 }
 
-.sort-control {
-  position: relative;
-  flex-shrink: 0;
-  width: 51px;
-  height: 51px;
-  border: 1px solid var(--line);
-
-  select {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-    font: inherit;
-  }
-
-  &:focus-within {
-    outline: 3px solid var(--accent);
-    outline-offset: 3px;
-  }
-
-  &:has(option[value="updated"]:checked) {
-    color: var(--accent);
-  }
-}
-
 .search {
   flex: 1;
   min-width: 0;
@@ -413,33 +386,11 @@ h1 {
   line-height: 1.4;
 }
 
-.bookmark-meta {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
+.domain {
   color: var(--muted);
   font-size: 13px;
   margin-top: 3px;
   line-height: 1.3;
-
-  time {
-    flex: none;
-    padding-inline-start: 8px;
-    border-inline-start: 1px solid var(--line);
-    font-size: 12px;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-  }
-
-  @media (max-width: 420px) {
-    display: grid;
-    gap: 2px;
-
-    time {
-      padding-inline-start: 0;
-      border: 0;
-    }
-  }
 }
 
 .edit {
@@ -993,53 +944,6 @@ body:has(.pin-gate:not([hidden])) {
   color: var(--accent);
   font-size: 15px;
   font-weight: 700;
-}
-
-.bookmark.reordering {
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-.drag-handle {
-  flex: none;
-  width: 55px;
-  min-height: 76px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  display: grid;
-  place-items: center;
-  cursor: grab;
-  touch-action: none;
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-touch-callout: none;
-}
-
-.drag-handle svg {
-  width: 22px;
-  height: 22px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-}
-
-.drag-placeholder {
-  opacity: .22;
-  border-style: dashed;
-}
-
-.drag-ghost {
-  position: fixed;
-  z-index: 25;
-  pointer-events: none;
-  margin: 0;
-  opacity: .95;
-  background: var(--surface);
-  box-shadow: var(--shadow);
-  transform: scale(1.015);
 }
 
 .sr-only {

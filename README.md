@@ -6,11 +6,10 @@ Eine kleine Web-App, mit der du deine Lieblingslinks direkt im Browser sammeln u
 
 ## Funktionen
 
-- Lesezeichen hinzufügen, öffnen, bearbeiten und löschen
+- Lesezeichen hinzufügen, öffnen, bearbeiten und löschen. Neue Lesezeichen erscheinen oben.
 - Nach Namen oder URL suchen
 - Mehrere Labels pro Lesezeichen vergeben und die Liste nach einem Label filtern
 - Neue Labels direkt im Lesezeichen eingeben. In der Desktopnavigation unter **Labels** und mobil unter **⋯ → Labels** lassen sich Labels anlegen, umbenennen, einfärben und löschen.
-- Die Reihenfolge per Ziehen oder mit den Pfeiltasten ändern
 - Unter **Einstellungen → Daten** Lesezeichen als JSON-Datei importieren und exportieren oder alle lokalen App-Daten einschließlich PIN-Schutz löschen
 - Unter **Einstellungen → Sprache** zwischen Deutsch und Englisch wechseln. Die gespeicherte Auswahl hat Vorrang. Ohne Auswahl startet die App bei deutscher Browsersprache (etwa `de-AT` oder `de-CH`) auf Deutsch, sonst auf Englisch.
 - Breite Fenster zeigen eine Desktopansicht mit direkter Navigation und mehrspaltigen Lesezeichenkarten. Unter **Einstellungen → Darstellung → Breite der mobilen Ansicht** legst du fest, wie lange die mobile Liste aktiv bleibt. Der Regler rastet bei **Immer Desktop**, **Standard** und **Immer mobil** leicht ein.
@@ -50,7 +49,7 @@ Der Build erzeugt eine einzelne Datei, `dist/index.html`. Sie enthält die Style
 - `index.html` enthält das Seiten-Markup mit Übersetzungsschlüsseln und ist der Einstiegspunkt für Vite.
 - `src/i18n/` enthält die beiden typgeprüften Sprachkataloge. Statische Texte und Attribute verwenden `data-i18n`-Bindungen, dynamische Texte kommen über `messages()` aus dem aktiven Katalog. Beide Sprachen sind im Offline-Build enthalten.
 - `src/main.ts` registriert die Ansichten. `src/views.ts` wechselt die sichtbare Ansicht und setzt den Tastaturfokus auf ihre Überschrift.
-- `src/bookmarks/` enthält die Lesezeichenansicht, die Validierung und den lokalen Speicher. Die Sortieransicht in `src/reorder/` verwendet dieselben Lesezeichen und Karten.
+- `src/bookmarks/` enthält die Lesezeichenansicht, die Validierung und den lokalen Speicher.
 - `src/labels/` enthält die Label-Verwaltung und die Mehrfachauswahl im Lesezeichen-Editor.
 - `src/settings/view.ts` enthält die Einstellungen für PIN-Schutz und Datenverwaltung.
 - `src/pin/` enthält die PIN-Oberfläche und verwendet Web Crypto für die PIN-Prüfung.
