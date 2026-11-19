@@ -17,6 +17,7 @@
         </button>
         <div id="popup" class="popup" hidden>
           <button id="reorderButton" type="button" data-i18n="reorder"></button>
+          <button id="labelsButton" type="button" data-i18n="labels"></button>
           <button id="settingsButton" type="button" data-i18n="settings"></button>
           <button id="lockButton" type="button" hidden data-i18n="lockNow"></button>
         </div>
@@ -31,6 +32,7 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7"/><path d="m16 16 5 5"/></svg>
         <input id="search" type="search" data-i18n-placeholder="search" autocomplete="off" data-i18n-aria-label="searchBookmarks">
       </div>
+      <select id="labelFilter" class="label-filter" data-i18n-aria-label="filterByLabel" hidden></select>
       <div class="icon-button sort-control">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h12M3 11h8M3 16h4M17 9v11m-4-4 4 4 4-4"/></svg>
         <select id="sortOrder" data-i18n-aria-label="sortBookmarks">
@@ -61,10 +63,49 @@
       <h2 id="editorTitle"></h2>
       <label class="field"><span data-i18n="name"></span><input id="nameInput" type="text" maxlength="100" autocomplete="off" required data-i18n-placeholder="name"></label>
       <label class="field"><span data-i18n="address"></span><input id="urlInput" type="url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" required placeholder="https://"></label>
+      <div class="field">
+        <label for="labelInput" data-i18n="labels"></label>
+        <div id="selectedLabels" class="label-badges"></div>
+        <div class="label-entry">
+          <input id="labelInput" type="text" list="labelSuggestions" autocomplete="off" data-i18n-placeholder="addLabel">
+          <button id="assignLabel" class="icon-button" type="button" data-i18n-aria-label="addLabel" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+        <datalist id="labelSuggestions"></datalist>
+      </div>
       <p id="error" class="error" role="alert"></p>
       <div class="dialog-actions">
         <button id="deleteButton" class="remove" type="button" hidden data-i18n="delete"></button>
         <button id="cancelButton" class="secondary" type="button" data-i18n="cancel"></button>
+        <button class="save" type="submit" data-i18n="save"></button>
+      </div>
+    </form>
+  </dialog>
+
+  <main id="labelsView" class="app" aria-labelledby="labelsTitle" hidden>
+    <header>
+      <h1 id="labelsTitle" tabindex="-1" data-i18n="labels"></h1>
+      <div class="actions">
+        <button id="newLabel" class="icon-button primary" type="button" data-i18n-aria-label="addLabel">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+        <button id="backFromLabels" class="done-button" type="button" data-i18n="done"></button>
+      </div>
+    </header>
+    <ul id="managedLabels" class="bookmarks" role="list"></ul>
+    <p id="labelsEmpty" class="empty" data-i18n="noLabels"></p>
+  </main>
+
+  <dialog id="labelEditor" aria-labelledby="labelTitle">
+    <form id="labelForm" class="dialog-inner">
+      <h2 id="labelTitle"></h2>
+      <label class="field"><span data-i18n="name"></span><input id="labelName" type="text" autocomplete="off" required></label>
+      <label class="label-color-field"><span data-i18n="color"></span><input id="labelColor" type="color"></label>
+      <p id="labelError" class="error" role="alert"></p>
+      <div class="dialog-actions">
+        <button id="deleteLabel" class="remove" type="button" data-i18n="delete" hidden></button>
+        <button id="cancelLabel" class="secondary" type="button" data-i18n="cancel"></button>
         <button class="save" type="submit" data-i18n="save"></button>
       </div>
     </form>

@@ -8,6 +8,8 @@ Eine kleine Web-App, mit der du deine Lieblingslinks direkt im Browser sammeln u
 
 - Lesezeichen hinzufügen, öffnen, bearbeiten und löschen
 - Nach Namen oder URL suchen
+- Mehrere Labels pro Lesezeichen vergeben und die Liste nach einem Label filtern
+- Neue Labels direkt im Lesezeichen eingeben. Unter **⋯ → Labels** lassen sich Labels anlegen, umbenennen, einfärben und löschen.
 - Die Reihenfolge per Ziehen oder mit den Pfeiltasten ändern
 - Unter **Einstellungen → Daten** Lesezeichen als JSON-Datei importieren und exportieren oder alle lokalen App-Daten einschließlich PIN-Schutz löschen
 - Unter **Einstellungen → Sprache** zwischen Deutsch und Englisch wechseln. Die gespeicherte Auswahl hat Vorrang. Ohne Auswahl startet die App bei deutscher Browsersprache (etwa `de-AT` oder `de-CH`) auf Deutsch, sonst auf Englisch.
@@ -15,7 +17,9 @@ Eine kleine Web-App, mit der du deine Lieblingslinks direkt im Browser sammeln u
 
 Die App speichert deine Lesezeichen und PIN-Einstellungen im Browser (`localStorage`). Zum Übertragen deiner Lesezeichen auf ein anderes Gerät oder an einen anderen Speicherort verwende den JSON-Export und -Import. Auch mit aktivierter PIN bleiben die gespeicherten Lesezeichen im Klartext.
 
-Browser-Speicher und JSON-Export verwenden für Lesezeichen dasselbe Format (Version 2). Ein Backup enthält die Einträge in Listenreihenfolge mit ID, Name, URL sowie Erstellungs- und Änderungszeit. Der Import stellt diese Reihenfolge in einer leeren Liste wieder her. In einer bestehenden Liste fügt er neue IDs vorne ein und behält für bekannte IDs die lokale Fassung bei. Mehrere Lesezeichen dürfen dieselbe URL haben. Bei einer ungültigen Datei oder mehrfach vergebenen ID wird der gesamte Import abgebrochen.
+Browser-Speicher und JSON-Export verwenden dasselbe Format (Version 3). Das Backup enthält alle Labels mit ID, Name und Farbe, auch ungenutzte Labels. Die Lesezeichen enthalten die zugehörigen Label-IDs. Vorhandene Daten und Backups der Version 2 mit oder ohne Einzel-Label können weiterhin geladen werden.
+
+Der Import fügt neue Lesezeichen in ihrer Listenreihenfolge vorne ein. Bei bekannten Lesezeichen-IDs bleibt die lokale Fassung erhalten. Labels werden zuerst anhand der ID, dann anhand des Namens zugeordnet. Bereits vorhandene Labels behalten ihren lokalen Namen und ihre Farbe. Ungültige Dateien werden vollständig abgelehnt.
 
 Mit diesem Konzeptstand beginnen die Lesezeichenliste und der PIN-Schutz in eigenen neuen Speichereinträgen. Wer eine PIN verwenden möchte, richtet sie für diese Version neu ein.
 
@@ -44,8 +48,9 @@ Der Build erzeugt eine einzelne Datei, `dist/index.html`. Sie enthält die Style
 
 - `index.html` enthält das Seiten-Markup mit Übersetzungsschlüsseln und ist der Einstiegspunkt für Vite.
 - `src/i18n/` enthält die beiden typgeprüften Sprachkataloge. Statische Texte und Attribute verwenden `data-i18n`-Bindungen, dynamische Texte kommen über `messages()` aus dem aktiven Katalog. Beide Sprachen sind im Offline-Build enthalten.
-- `src/main.ts` registriert die vier Ansichten. `src/views.ts` wechselt die sichtbare Ansicht und setzt den Tastaturfokus auf ihre Überschrift.
+- `src/main.ts` registriert die Ansichten. `src/views.ts` wechselt die sichtbare Ansicht und setzt den Tastaturfokus auf ihre Überschrift.
 - `src/bookmarks/` enthält die Lesezeichenansicht, die Validierung und den lokalen Speicher. Die Sortieransicht in `src/reorder/` verwendet dieselben Lesezeichen und Karten.
+- `src/labels/` enthält die Label-Verwaltung und die Mehrfachauswahl im Lesezeichen-Editor.
 - `src/settings/view.ts` enthält die Einstellungen für PIN-Schutz und Datenverwaltung.
 - `src/pin/` enthält die PIN-Oberfläche und verwendet Web Crypto für die PIN-Prüfung.
 - `src/styles.scss` enthält die Komponentenstile und die Farben für Hell- und Dunkelmodus.

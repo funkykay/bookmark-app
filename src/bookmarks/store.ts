@@ -1,44 +1,54 @@
 import { messages } from '../i18n';
-import { parseBookmarks, serializeBookmarks } from './model';
-import type { Bookmark } from './model';
+import { parseLibrary, serializeLibrary } from './model';
+import type { Library } from './model';
 
 const storageKey = 'donni-bookmark-lesezeichen';
 
 export function createBookmarkStore(notify: (message: string) => void, onChange: () => void) {
-  let items: Bookmark[] = [];
+  let data: Library = { bookmarks: [], labels: [] };
   let loadFailed = false;
   try {
     const stored = localStorage.getItem(storageKey);
-    if (stored !== null) items = parseBookmarks(stored);
+    if (stored !== null) {
+      const saved = JSON.parse(stored);
+      data = parseLibrary(saved);
+      if (saved.version === 2) {
+        try {
+          localStorage.setItem(storageKey, serializeLibrary(data));
+        } catch {
+          notify(messages().saveFailed);
+        }
+      }
+    }
   } catch {
     loadFailed = true;
     notify(messages().loadFailed);
   }
 
-  function persist(next: Bookmark[]): boolean {
+  function persist(next: Library): boolean {
     try {
-      if (next.length) localStorage.setItem(storageKey, serializeBookmarks(next));
+      if (next.bookmarks.length || next.labels.length) localStorage.setItem(storageKey, serializeLibrary(next));
       else localStorage.removeItem(storageKey);
     } catch {
       notify(messages().saveFailed);
       return false;
     }
-    items = next;
+    data = next;
     loadFailed = false;
     onChange();
     return true;
   }
 
   return {
-    get items(): readonly Bookmark[] { return items; },
-    save(next: Bookmark[]): boolean {
+    get data(): Library { return data; },
+    save(next: Library): boolean {
       if (loadFailed) {
         notify(messages().loadFailed);
         return false;
       }
       return persist(next);
     },
-    clear() { return persist([]); },
+    clear() { return persist({ bookmarks: [], labels: [] }); },
   };
 }
 

@@ -1,6 +1,7 @@
 import { currentLanguage, messages } from '../i18n';
 import { hostname } from './model';
-import type { Bookmark } from './model';
+import { labelBadge } from '../labels/display';
+import type { Bookmark, Label } from './model';
 
 const tiles = [
   ['#e8efff', '#4265c9'], ['#e3f3ee', '#20846d'], ['#ffecdf', '#b66a31'],
@@ -8,7 +9,8 @@ const tiles = [
 ] as const;
 
 export function createBookmarkCard(
-  bookmark: Bookmark, content: HTMLAnchorElement | HTMLDivElement, action: HTMLButtonElement, updatedDate?: string,
+  bookmark: Bookmark, labels: ReadonlyMap<string, Label>,
+  content: HTMLAnchorElement | HTMLDivElement, action: HTMLButtonElement, updatedDate?: string,
 ): HTMLLIElement {
   const { id, name, url } = bookmark;
   const domain = hostname(url);
@@ -52,6 +54,19 @@ export function createBookmarkCard(
     content.setAttribute('aria-describedby', time.id);
   }
   detail.append(title, metadata);
+  if (bookmark.labelIds.length) {
+    const badges = document.createElement('span');
+    badges.className = 'label-badges';
+    for (const labelId of bookmark.labelIds) {
+      const label = labels.get(labelId);
+      if (label) badges.append(labelBadge(label));
+    }
+    detail.append(badges);
+    if (content instanceof HTMLAnchorElement) {
+      badges.id = `labels-${id}`;
+      content.setAttribute('aria-describedby', [badges.id, updatedDate && `updated-${id}`].filter(Boolean).join(' '));
+    }
+  }
   content.append(glyph, detail);
 
   card.append(content, action);

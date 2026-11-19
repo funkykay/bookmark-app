@@ -21,14 +21,15 @@ export function initReorder(store: BookmarkStore): View {
 
   function render(): void {
     clearDrag();
-    const cards = store.items.map((bookmark) => {
+    const labels = new Map(store.data.labels.map(label => [label.id, label]));
+    const cards = store.data.bookmarks.map((bookmark) => {
       const action = document.createElement('button');
       action.type = 'button';
       action.className = 'drag-handle';
       action.title = messages().dragHint;
       action.setAttribute('aria-label', messages().moveNamed(bookmark.name));
       action.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4v16M15 4v16" stroke-dasharray="1 4" stroke-width="3.5"/></svg>';
-      const card = createBookmarkCard(bookmark, document.createElement('div'), action);
+      const card = createBookmarkCard(bookmark, labels, document.createElement('div'), action);
       card.classList.add('reordering');
       return card;
     });
@@ -85,11 +86,11 @@ export function initReorder(store: BookmarkStore): View {
     if (event.pointerId !== drag?.pointerId) return;
     clearDrag();
 
-    const byId = new Map(store.items.map((bookmark) => [bookmark.id, bookmark]));
+    const byId = new Map(store.data.bookmarks.map((bookmark) => [bookmark.id, bookmark]));
     const next = Array.from(list.querySelectorAll<HTMLLIElement>('li[data-bookmark-id]'))
       .map((item) => byId.get(item.dataset.bookmarkId ?? ''))
       .filter((bookmark) => bookmark !== undefined);
-    if (next.length !== store.items.length || next.every((bookmark, index) => bookmark === store.items[index]) || !store.save(next)) {
+    if (next.length !== store.data.bookmarks.length || next.every((bookmark, index) => bookmark === store.data.bookmarks[index]) || !store.save({ ...store.data, bookmarks: next })) {
       render();
     }
   }
@@ -131,14 +132,14 @@ export function initReorder(store: BookmarkStore): View {
     if (!item) return;
     event.preventDefault();
 
-    const index = store.items.findIndex(({ id }) => id === item.dataset.bookmarkId);
+    const index = store.data.bookmarks.findIndex(({ id }) => id === item.dataset.bookmarkId);
     const nextIndex = index + (event.key === 'ArrowUp' ? -1 : 1);
-    const moved = store.items[index];
-    if (!moved || nextIndex < 0 || nextIndex >= store.items.length) return;
-    const next = store.items.slice();
+    const moved = store.data.bookmarks[index];
+    if (!moved || nextIndex < 0 || nextIndex >= store.data.bookmarks.length) return;
+    const next = store.data.bookmarks.slice();
     next.splice(index, 1);
     next.splice(nextIndex, 0, moved);
-    if (!store.save(next)) return;
+    if (!store.save({ ...store.data, bookmarks: next })) return;
     list.children[nextIndex]?.querySelector('button')?.focus();
     announcer.textContent = messages().position(moved.name, nextIndex + 1, next.length);
   }
