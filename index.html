@@ -194,6 +194,43 @@
       <button id="pinCancel" type="button" class="pin-cancel" hidden data-i18n="cancel"></button>
     </div>
   </main>
+  <main id="legalView" class="app legal-page" aria-labelledby="legalTitle" hidden>
+    <a href="?" class="legal-back" data-i18n="backToApp"></a>
+    <h1 id="legalTitle"></h1>
+    <h2 id="operatorRole"></h2>
+    <address>
+      Kay Donner<br>
+      Ludwigstraße 9<br>
+      38106 Braunschweig<br>
+      <span data-i18n="germany"></span><br>
+      <a href="mailto:bookmarks@kaydonner.de">bookmarks@kaydonner.de</a>
+    </address>
+    <div id="privacyContent" hidden>
+      <h2 data-i18n="hostingTitle"></h2>
+      <p data-i18n="hostingData"></p>
+      <p data-i18n="hostingTransfer"></p>
+      <p><a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" data-i18n="githubPrivacy"></a></p>
+      <h2 data-i18n="localDataTitle"></h2>
+      <p data-i18n="localData"></p>
+      <p data-i18n="localPin"></p>
+      <p data-i18n="localPurpose"></p>
+      <p data-i18n="localDeletion"></p>
+      <h2 data-i18n="linksTitle"></h2>
+      <p data-i18n="linksData"></p>
+      <h2 data-i18n="contactTitle"></h2>
+      <p data-i18n="contactData"></p>
+      <h2 data-i18n="rightsTitle"></h2>
+      <p data-i18n="rightsData"></p>
+      <p><strong data-i18n="objection"></strong></p>
+      <p data-i18n="complaint"></p>
+      <p><a href="https://www.lfd.niedersachsen.de/" data-i18n="authority"></a></p>
+    </div>
+  </main>
+
+  <footer class="legal-links">
+    <a href="?seite=impressum" data-i18n="imprint"></a>
+    <a href="?seite=datenschutz" data-i18n="privacy"></a>
+  </footer>
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
   <script type="module" src="/src/main.ts"></script>

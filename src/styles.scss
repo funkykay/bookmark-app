@@ -80,6 +80,31 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   padding: calc(34px + env(safe-area-inset-top)) 20px calc(56px + env(safe-area-inset-bottom));
 }
 
+.legal-links {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  padding: 12px 20px max(20px, env(safe-area-inset-bottom));
+  font-size: 14px;
+
+  a { color: var(--muted); }
+}
+
+.legal-page {
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+
+  h2 {
+    margin: 1.6em 0 .4em;
+    font-size: 1.2rem;
+  }
+  p { margin: .6em 0; }
+  address { font-style: normal; }
+  a { color: var(--accent); }
+  .legal-back { display: inline-block; margin-bottom: 1.25rem; }
+}
+
 header {
   display: flex;
   align-items: center;
@@ -806,18 +831,19 @@ h2 {
   }
 }
 
+body:has(.pin-gate:not([hidden])) {
+  display: flex;
+  flex-direction: column;
+}
+
 .pin-gate {
-  position: fixed;
-  z-index: 30;
-  inset: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  display: grid;
+  flex: 1;
   background: var(--bg);
   touch-action: manipulation;
 }
 
 .pin-gate-inner {
-  min-height: 100%;
   width: min(100%, 395px);
   margin: auto;
   padding: max(26px, env(safe-area-inset-top)) 22px max(22px, env(safe-area-inset-bottom));
