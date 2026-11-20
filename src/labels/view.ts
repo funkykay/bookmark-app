@@ -1,4 +1,6 @@
-import { defaultLabelColor, labelKey, maxLabelLength, newLabel } from '../bookmarks/model';
+import { defaultLabelColor, maxLabelLength } from '../bookmarks/model';
+import { createLibraryEditor } from '../bookmarks/editor';
+import { deleteLabel, saveLabel } from '../bookmarks/operations';
 import type { Label } from '../bookmarks/model';
 import type { BookmarkStore } from '../bookmarks/store';
 import { element } from '../dom';
@@ -16,22 +18,21 @@ export function initLabels(store: BookmarkStore): View {
   const error = element('labelError', 'p');
   const remove = element('deleteLabel', 'button');
   const add = element('newLabel', 'button');
-  let editing: Label | undefined;
+  const form = element('labelForm', 'form');
+  const draft = createLibraryEditor<Label>(store, dialog, form, error);
   name.maxLength = maxLabelLength;
 
   function open(label?: Label): void {
-    editing = label;
+    draft.begin(label);
     title.textContent = label ? messages().editLabel : messages().addLabel;
     name.value = label?.name ?? '';
     color.value = label?.color ?? defaultLabelColor;
-    error.textContent = '';
     remove.hidden = !label;
     dialog.showModal();
     name.focus();
   }
 
-  function finish(id?: string): void {
-    dialog.close();
+  function focusRow(id?: string): void {
     const row = list.querySelector<HTMLButtonElement>(`[data-label-id="${id}"]`);
     (row ?? add).focus();
   }
@@ -52,29 +53,18 @@ export function initLabels(store: BookmarkStore): View {
     }));
   }
 
-  element('labelForm', 'form').addEventListener('submit', event => {
+  form.addEventListener('submit', event => {
     event.preventDefault();
-    const value = name.value.trim();
-    const duplicate = store.data.labels.some(label => label.id !== editing?.id && labelKey(label.name) === labelKey(value));
-    if (!value || duplicate) {
-      error.textContent = duplicate ? messages().labelTaken : messages().missingName;
-      name.focus();
-      return;
-    }
-    const label = { ...(editing ?? newLabel(value)), name: value, color: color.value };
-    const labels = editing ? store.data.labels.map(item => item.id === label.id ? label : item) : [...store.data.labels, label];
-    if (store.save({ ...store.data, labels })) finish(label.id);
+    const input = { name: name.value, color: color.value };
+    void draft.submit((library, original) => saveLabel(library, input, original),
+      label => focusRow(label.id), () => name.focus());
   });
 
   remove.addEventListener('click', () => {
-    if (!editing || !window.confirm(messages().deleteNamed(editing.name))) return;
-    const id = editing.id;
-    const updated = new Date().toISOString();
-    const labels = store.data.labels.filter(label => label.id !== id);
-    const bookmarks = store.data.bookmarks.map(bookmark => bookmark.labelIds.includes(id)
-      ? { ...bookmark, labelIds: bookmark.labelIds.filter(ref => ref !== id), updated }
-      : bookmark);
-    if (store.save({ bookmarks, labels })) finish();
+    const label = draft.original;
+    if (label && window.confirm(messages().deleteNamed(label.name))) {
+      void draft.submit(library => deleteLabel(library, label), () => focusRow());
+    }
   });
   add.addEventListener('click', () => open());
   element('cancelLabel', 'button').addEventListener('click', () => dialog.close());

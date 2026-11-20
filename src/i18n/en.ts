@@ -94,6 +94,8 @@ export const en = {
   missingName: 'Enter a name.',
   invalidUrl: 'Enter a valid web address.',
   loadFailed: 'Unable to load local bookmarks. Changes are blocked.',
+  libraryConflict: 'The data has changed. Reopen the item or repeat the action with the latest data.',
+  invalidLabel: 'Choose a valid label name and color.',
   saveFailed: 'Unable to save. Check your browser settings.',
   appearanceSession: 'Appearance settings apply only to this session.',
   appearanceResetFailed: 'Unable to reset appearance settings.',

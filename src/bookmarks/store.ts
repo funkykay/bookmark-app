@@ -1,58 +1,105 @@
-import { messages } from '../i18n';
-import { parseLibrary, serializeLibrary } from './model';
-import type { Library } from './model';
-import { storage } from '../storage';
+import { createId, mergeLibrary, parseLibrary, serializeLibrary } from './model.js';
+import type { Library } from './model.js';
+import { LibraryError } from './operations.js';
+import type { Change, LibraryIssue } from './operations.js';
+import { storage } from '../storage.js';
 
-function readStoredLibrary(): { data: Library; version: number | null } {
-  const stored = storage.read('bookmarks');
-  if (stored === null) return { data: { bookmarks: [], labels: [] }, version: null };
-  const saved = JSON.parse(stored);
-  return { data: parseLibrary(saved), version: saved.version };
-}
+export type WriteIssue = LibraryIssue | 'saveFailed' | 'loadFailed';
+export type WriteResult<T> = { ok: true; value: T } | { ok: false; issue: WriteIssue };
 
-export function createBookmarkStore(notify: (message: string) => void, onChange: () => void) {
+export function createBookmarkStore(report: (issue: WriteIssue) => void, onChange: () => void, adapter = storage) {
   let data: Library = { bookmarks: [], labels: [] };
-  let loadFailed = false;
-  try {
-    const stored = readStoredLibrary();
-    data = stored.data;
-    if (stored.version === 2) {
-      try {
-        storage.write('bookmarks', serializeLibrary(data));
-      } catch {
-        notify(messages().saveFailed);
-      }
-    }
-  } catch {
-    loadFailed = true;
-    notify(messages().loadFailed);
+  let generation: string | undefined;
+  let raw: string | null | undefined;
+
+  function load(): void {
+    const stored = adapter.read('bookmarks');
+    if (stored === raw) return;
+    const saved = stored === null ? null : JSON.parse(stored);
+    data = stored === null ? { bookmarks: [], labels: [] } : parseLibrary(saved);
+    generation = typeof saved?.generation === 'string' ? saved.generation : undefined;
+    raw = stored;
   }
 
-  function persist(next: Library): boolean {
-    try {
-      if (next.bookmarks.length || next.labels.length) storage.write('bookmarks', serializeLibrary(next));
-      else storage.remove('bookmarks');
-    } catch {
-      notify(messages().saveFailed);
-      return false;
-    }
+  function persist(next: Library, nextGeneration = generation): void {
+    const stored = serializeLibrary(next, nextGeneration);
+    adapter.write('bookmarks', stored);
+    raw = stored;
     data = next;
-    loadFailed = false;
-    onChange();
-    return true;
+    generation = nextGeneration;
+  }
+
+  try {
+    load();
+  } catch {
+    report('loadFailed');
+  }
+
+  adapter.onExternalChange('bookmarks', () => {
+    const before = data;
+    try {
+      load();
+    } catch {
+      report('loadFailed');
+    }
+    if (before !== data) onChange();
+  });
+
+  async function change<T>(expectedGeneration: string | undefined, operation: (latest: Library) => Change<T>): Promise<WriteResult<T>> {
+    try {
+      return await adapter.withLibraryLock((): WriteResult<T> => {
+        const before = data;
+        try {
+          try {
+            load();
+          } catch {
+            return { ok: false, issue: 'loadFailed' };
+          }
+          if (expectedGeneration !== generation) throw new LibraryError('libraryConflict');
+          const { library, value } = operation(data);
+          if (library !== data) persist(library);
+          return { ok: true, value };
+        } finally {
+          if (before !== data) onChange();
+        }
+      });
+    } catch (error) {
+      return { ok: false, issue: error instanceof LibraryError ? error.issue : 'saveFailed' };
+    }
   }
 
   return {
     get data(): Library { return data; },
-    exportBackup(): string { return serializeLibrary(readStoredLibrary().data); },
-    save(next: Library): boolean {
-      if (loadFailed) {
-        notify(messages().loadFailed);
+    // Editors and imports capture this when they start. A reset invalidates them even if the library was empty.
+    get generation() { return generation; },
+    change,
+    exportBackup(): string {
+      const stored = adapter.read('bookmarks');
+      return serializeLibrary(stored === null ? { bookmarks: [], labels: [] } : parseLibrary(JSON.parse(stored)));
+    },
+    importBackup(expectedGeneration: string | undefined, incoming: Library) {
+      return change(expectedGeneration, latest => {
+        const merged = mergeLibrary(latest, incoming);
+        const bookmarks = merged.bookmarks.length - latest.bookmarks.length;
+        const labels = merged.labels.length - latest.labels.length;
+        return { library: bookmarks || labels ? merged : latest, value: { bookmarks, labels } };
+      });
+    },
+    async reset(clearSettings: () => boolean): Promise<boolean> {
+      try {
+        return await adapter.withLibraryLock(() => {
+          if (!adapter.hasCurrentBackup()) return false;
+          persist({ bookmarks: [], labels: [] }, createId());
+          onChange();
+          if (!clearSettings()) return false;
+          adapter.clearBackupHistory();
+          return true;
+        });
+      } catch {
+        report('saveFailed');
         return false;
       }
-      return persist(next);
     },
-    clear() { return persist({ bookmarks: [], labels: [] }); },
   };
 }
 

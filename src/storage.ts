@@ -1,6 +1,7 @@
 type StorageKey = 'bookmarks' | 'pin' | 'language' | 'appearance';
 
 export interface AppStorage {
+  withLibraryLock<T>(operation: () => T): Promise<T>;
   read(key: StorageKey): string | null;
   write(key: StorageKey, value: string): void;
   remove(key: StorageKey): void;
@@ -46,7 +47,35 @@ function update(key: StorageKey, value: string | null): void {
   backupEvents.dispatchEvent(new Event('change'));
 }
 
+// On plain HTTP Web Locks are unavailable. A read/write IndexedDB transaction
+// provides the same exclusive section while the synchronous operation runs.
+function withLibraryLock<T>(operation: () => T): Promise<T> {
+  const lockName = localStorageKeys.bookmarks;
+  if (navigator.locks) return navigator.locks.request(lockName, operation);
+  return new Promise((resolve, reject) => {
+    const open = indexedDB.open(lockName + '-lock', 1);
+    open.onupgradeneeded = () => open.result.createObjectStore('lock');
+    open.onerror = () => reject(open.error);
+    open.onsuccess = () => {
+      const db = open.result;
+      const transaction = db.transaction('lock', 'readwrite');
+      let result: T;
+      transaction.oncomplete = () => { db.close(); resolve(result); };
+      transaction.onabort = () => { db.close(); reject(transaction.error); };
+      transaction.objectStore('lock').get(0).onsuccess = () => {
+        try {
+          result = operation();
+        } catch (error) {
+          transaction.abort();
+          reject(error);
+        }
+      };
+    };
+  });
+}
+
 export const storage: AppStorage = {
+  withLibraryLock,
   read(key) {
     return localStorage.getItem(localStorageKeys[key]);
   },
@@ -58,7 +87,7 @@ export const storage: AppStorage = {
   },
   onExternalChange(key, listener) {
     window.addEventListener('storage', event => {
-      if (event.key === localStorageKeys[key] || event.key === null) listener();
+      if (event.storageArea === localStorage && (event.key === localStorageKeys[key] || event.key === null)) listener();
     });
   },
   lastChange() {

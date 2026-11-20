@@ -1,5 +1,5 @@
 import { messages } from '../i18n';
-import { mergeLibrary, parseLibrary } from '../bookmarks/model';
+import { parseLibrary } from '../bookmarks/model';
 import type { Library } from '../bookmarks/model';
 import type { BookmarkStore } from '../bookmarks/store';
 import { element } from '../dom';
@@ -30,7 +30,6 @@ export function initSettings({ store, pin, notify, clearLanguage }: Options): Vi
   const importFile = element('importFile', 'input');
   const purgeButton = element('purgeButton', 'button');
   const purgeHint = element('purgeHint', 'p');
-  let purgeVersion = 0;
 
   function exportBookmarks(): void {
     const exportedAt = new Date();
@@ -63,7 +62,7 @@ export function initSettings({ store, pin, notify, clearLanguage }: Options): Vi
     importFile.value = '';
     if (!file) return;
 
-    const version = purgeVersion;
+    const generation = store.generation;
     let entries: Library;
     try {
       entries = parseLibrary(JSON.parse(await file.text()));
@@ -71,31 +70,21 @@ export function initSettings({ store, pin, notify, clearLanguage }: Options): Vi
       notify(messages().importFailed);
       return;
     }
-    if (version !== purgeVersion) return;
-    const merged = mergeLibrary(store.data, entries);
-    const added = merged.bookmarks.length - store.data.bookmarks.length;
-    const addedLabels = merged.labels.length - store.data.labels.length;
-    if (!added && !addedLabels) {
-      notify(messages().nothingToImport);
+    const result = await store.importBackup(generation, entries);
+    if (!result.ok) {
+      notify(messages()[result.issue]);
       return;
     }
-    if (store.save(merged)) notify(messages().imported(added, addedLabels));
+    const { bookmarks, labels } = result.value;
+    notify(bookmarks || labels ? messages().imported(bookmarks, labels) : messages().nothingToImport);
   }
 
-  function purgeData(): void {
+  async function purgeData(): Promise<void> {
     if (!storage.hasCurrentBackup() || !window.confirm(messages().confirmPurge)) return;
-    // Another tab may have saved changes while the confirmation was open.
-    if (!storage.hasCurrentBackup()) return;
-    purgeVersion++;
-    if (!store.clear() || !pin.clearSettings() || !clearAppearance() || !clearLanguage()) return;
-    try {
-      storage.clearBackupHistory();
-    } catch {
-      notify(messages().saveFailed);
-      return;
+    if (await store.reset(() => pin.clearSettings() && clearAppearance() && clearLanguage())) {
+      render();
+      notify(messages().purged);
     }
-    render();
-    notify(messages().purged);
   }
 
   function updatePurgeButton(): void {

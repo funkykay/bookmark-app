@@ -1,7 +1,7 @@
 import { currentLanguage } from '../i18n';
 import type { Label } from '../bookmarks/model';
 
-export function labelBadge(label: Label): HTMLSpanElement {
+export function labelBadge(label: Pick<Label, 'name' | 'color'>): HTMLSpanElement {
   const badge = document.createElement('span');
   badge.className = 'bookmark-label';
   badge.style.setProperty('--label-color', label.color);

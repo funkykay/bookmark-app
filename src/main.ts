@@ -1,4 +1,5 @@
 import './styles.scss';
+import { messages } from './i18n';
 import { createBookmarkStore } from './bookmarks/store';
 import { initBookmarks } from './bookmarks/view';
 import { createToast } from './dom';
@@ -17,7 +18,7 @@ if (legacyUrl) location.replace(legacyUrl);
 else startApp();
 
 function startApp() {
-  const store = createBookmarkStore(notify, () => navigation.refresh());
+  const store = createBookmarkStore(issue => notify(messages()[issue]), () => navigation.refresh());
   const pin = initPin({
     notify,
     onGateChange() { navigation.syncFromUrl(); },

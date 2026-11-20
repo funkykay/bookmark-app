@@ -3,7 +3,8 @@ import { element } from '../dom';
 import type { View } from '../views';
 import type { PinControls } from '../pin/view';
 import { createBookmarkCard } from './card';
-import { createId, labelKey, maxNameLength, normalizeUrl } from './model';
+import { deleteBookmark, saveBookmark } from './operations';
+import { createLibraryEditor } from './editor';
 import { labelBadge, sortedLabels } from '../labels/display';
 import { initLabelPicker } from '../labels/picker';
 import type { Bookmark, Label } from './model';
@@ -61,7 +62,8 @@ export function initBookmarks({ store, pin }: Options): View {
     }
   });
 
-  let editingId: string | null = null;
+  const form = element('editorForm', 'form');
+  const draft = createLibraryEditor<Bookmark>(store, editor, form, error);
   let labels = new Map<string, Label>();
   let selectedLabelId = '';
 
@@ -122,61 +124,39 @@ export function initBookmarks({ store, pin }: Options): View {
   function openEditor(bookmark?: Bookmark): void {
     closeMenu();
     closeLabelTiles();
-    editingId = bookmark?.id ?? null;
+    draft.begin(bookmark);
     editorTitle.textContent = bookmark ? messages().editBookmark : messages().addBookmark;
     nameInput.value = bookmark?.name ?? '';
     urlInput.value = bookmark?.url ?? '';
     const ids = bookmark?.labelIds ?? [selectedLabelId];
     picker.reset(store.data.labels, ids.map(id => labels.get(id)).filter(label => label !== undefined));
     deleteButton.hidden = !bookmark;
-    error.textContent = '';
     editor.showModal();
     nameInput.focus();
   }
 
   function saveEditor(event: SubmitEvent): void {
     event.preventDefault();
-    const name = nameInput.value.trim().slice(0, maxNameLength);
-    const url = normalizeUrl(urlInput.value);
-    if (!name) {
-      error.textContent = messages().missingName;
-      nameInput.focus();
-      return;
-    }
-    if (!url) {
-      error.textContent = messages().invalidUrl;
-      urlInput.focus();
-      return;
-    }
-
-    const byName = new Map(store.data.labels.map(label => [labelKey(label.name), label]));
-    const chosen = picker.read().map(label => labels.get(label.id) ?? byName.get(labelKey(label.name)) ?? label);
-    const labelIds = chosen.map(label => label.id);
-    const fresh = chosen.filter(label => !labels.has(label.id));
-    const now = new Date().toISOString();
-    const next = editingId
-      ? store.data.bookmarks.map((bookmark) => {
-        if (bookmark.id !== editingId) return bookmark;
-        const sameLabels = labelIds.length === bookmark.labelIds.length && labelIds.every((id, i) => id === bookmark.labelIds[i]);
-        if (bookmark.name === name && bookmark.url === url && sameLabels) return bookmark;
-        return { ...bookmark, name, url, labelIds, updated: now };
-      })
-      : [{ id: createId(), name, url, labelIds, creation: now, updated: now }, ...store.data.bookmarks];
-    if (store.save({ bookmarks: next, labels: [...store.data.labels, ...fresh] })) editor.close();
+    const input = { name: nameInput.value, url: urlInput.value, labels: picker.read() };
+    void draft.submit((library, original) => saveBookmark(library, input, original), undefined, issue => {
+      if (issue === 'missingName') nameInput.focus();
+      if (issue === 'invalidUrl') urlInput.focus();
+    });
   }
 
-  function deleteBookmark(): void {
-    const bookmark = store.data.bookmarks.find(({ id }) => id === editingId);
-    if (!bookmark || !window.confirm(messages().deleteNamed(bookmark.name))) return;
-    if (store.save({ ...store.data, bookmarks: store.data.bookmarks.filter(({ id }) => id !== bookmark.id) })) editor.close();
+  function confirmDelete(): void {
+    const bookmark = draft.original;
+    if (bookmark && window.confirm(messages().deleteNamed(bookmark.name))) {
+      void draft.submit(library => deleteBookmark(library, bookmark));
+    }
   }
 
   lockButton.addEventListener('click', pin.lock);
   desktopLock.addEventListener('click', pin.lock);
-  element('editorForm', 'form').addEventListener('submit', saveEditor);
+  form.addEventListener('submit', saveEditor);
   element('cancelButton', 'button').addEventListener('click', () => editor.close());
   editor.addEventListener('click', (event) => { if (event.target === editor) editor.close(); });
-  deleteButton.addEventListener('click', deleteBookmark);
+  deleteButton.addEventListener('click', confirmDelete);
   addButton.addEventListener('click', () => openEditor());
   element('desktopAdd', 'button').addEventListener('click', () => openEditor());
   emptyAdd.addEventListener('click', () => openEditor());

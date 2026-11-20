@@ -1,21 +1,21 @@
 export interface Bookmark {
-  id: string;
-  name: string;
-  url: string;
-  labelIds: string[];
-  creation: string;
-  updated: string;
+  readonly id: string;
+  readonly name: string;
+  readonly url: string;
+  readonly labelIds: readonly string[];
+  readonly creation: string;
+  readonly updated: string;
 }
 
 export interface Label {
-  id: string;
-  name: string;
-  color: string;
+  readonly id: string;
+  readonly name: string;
+  readonly color: string;
 }
 
 export interface Library {
-  bookmarks: Bookmark[];
-  labels: Label[];
+  readonly bookmarks: readonly Bookmark[];
+  readonly labels: readonly Label[];
 }
 
 export const maxNameLength = 100;
@@ -69,32 +69,35 @@ function isName(value: unknown, limit: number): value is string {
   return typeof value === 'string' && value.length > 0 && value.length <= limit && value === value.trim();
 }
 
-function isLabelName(value: unknown): value is string {
+export function isLabelName(value: unknown): value is string {
   return isName(value, maxLabelLength) && !/[\r\n]/.test(value);
+}
+
+export function isLabelColor(value: unknown): value is string {
+  return typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value);
 }
 
 function parseLabel(input: unknown): Label {
   if (!isRecord(input) || !isId(input.id) || !isLabelName(input.name)
-    || typeof input.color !== 'string' || !/^#[0-9a-f]{6}$/i.test(input.color)) {
+    || !isLabelColor(input.color)) {
     throw new Error('Ungültiges Label');
   }
   return { id: input.id, name: input.name, color: input.color };
 }
 
-export function serializeLibrary({ bookmarks, labels }: Library): string {
-  return JSON.stringify({ version: 3, labels, bookmarks }, null, 2);
+export function serializeLibrary({ bookmarks, labels }: Library, generation?: string): string {
+  return JSON.stringify({ version: 3, generation, labels, bookmarks }, null, 2);
 }
 
 export function parseLibrary(data: unknown): Library {
-  if (!isRecord(data) || (data.version !== 2 && data.version !== 3) || !Array.isArray(data.bookmarks)) {
+  if (!isRecord(data) || data.version !== 3 || !Array.isArray(data.bookmarks)) {
     throw new Error('Ungültiges Lesezeichenformat');
   }
-  const legacy = data.version === 2;
-  if (!legacy && !Array.isArray(data.labels)) throw new Error('Fehlende Labels');
-  const labels: Label[] = Array.isArray(data.labels) && !legacy ? data.labels.map(parseLabel) : [];
+  if (!Array.isArray(data.labels)) throw new Error('Fehlende Labels');
+  const labels: Label[] = data.labels.map(parseLabel);
   const labelIds = new Set(labels.map(label => label.id));
-  const byName = new Map(labels.map(label => [labelKey(label.name), label]));
-  if (labels.length !== labelIds.size || labels.length !== byName.size) throw new Error('Doppeltes Label');
+  const names = new Set(labels.map(label => labelKey(label.name)));
+  if (labels.length !== labelIds.size || labels.length !== names.size) throw new Error('Doppeltes Label');
 
   const ids = new Set<string>();
   const bookmarks = data.bookmarks.map((input: unknown): Bookmark => {
@@ -103,24 +106,10 @@ export function parseLibrary(data: unknown): Library {
       || !isTimestamp(input.creation) || !isTimestamp(input.updated)) throw new Error('Ungültiges Lesezeichen');
     ids.add(input.id);
     const { id, name, url, creation, updated } = input;
-    let assigned: string[] = [];
-    if (legacy && 'label' in input) {
-      if (!isLabelName(input.label)) throw new Error('Ungültiges Label');
-      const key = labelKey(input.label);
-      let label = byName.get(key);
-      if (!label) {
-        label = newLabel(input.label);
-        labels.push(label);
-        byName.set(key, label);
-      }
-      assigned = [label.id];
-    } else if (!legacy) {
-      const refs = input.labelIds;
-      if (!Array.isArray(refs) || !refs.every(ref => isId(ref) && labelIds.has(ref))
-        || new Set(refs).size !== refs.length) throw new Error('Ungültige Label-Zuordnung');
-      assigned = refs;
-    }
-    return { id, name, url, creation, updated, labelIds: assigned };
+    const refs = input.labelIds;
+    if (!Array.isArray(refs) || !refs.every(ref => isId(ref) && labelIds.has(ref))
+      || new Set(refs).size !== refs.length) throw new Error('Ungültige Label-Zuordnung');
+    return { id, name, url, creation, updated, labelIds: refs };
   });
   return { bookmarks, labels };
 }

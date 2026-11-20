@@ -1,6 +1,6 @@
 import { element } from '../dom';
 import { messages } from '../i18n';
-import { labelKey, maxLabelLength, newLabel } from '../bookmarks/model';
+import { defaultLabelColor, labelKey, maxLabelLength } from '../bookmarks/model';
 import type { Label } from '../bookmarks/model';
 import { labelBadge, sortedLabels } from './display';
 
@@ -12,7 +12,7 @@ export function initLabelPicker() {
   const add = element('assignLabel', 'button');
   input.maxLength = maxLabelLength;
   let available: Label[] = [];
-  let chosen: Label[] = [];
+  let chosen: (Pick<Label, 'name' | 'color'> & { id?: string })[] = [];
   let active: Element | null = null;
 
   function renderChosen(): void {
@@ -23,7 +23,7 @@ export function initLabelPicker() {
       button.setAttribute('aria-label', messages().removeLabel(label.name));
       button.append(labelBadge(label));
       button.addEventListener('click', () => {
-        chosen = chosen.filter(item => item.id !== label.id);
+        chosen = chosen.filter(item => item !== label);
         renderChosen();
         input.focus();
       });
@@ -85,7 +85,7 @@ export function initLabelPicker() {
     if (!name) return;
     const key = labelKey(name);
     if (!chosen.some(label => labelKey(label.name) === key)) {
-      chosen.push(available.find(label => labelKey(label.name) === key) ?? newLabel(name));
+      chosen.push(available.find(label => labelKey(label.name) === key) ?? { name, color: defaultLabelColor });
     }
     input.value = '';
     add.disabled = true;
@@ -138,9 +138,9 @@ export function initLabelPicker() {
       close();
       renderChosen();
     },
-    read(): readonly Label[] {
+    read() {
       accept(input.value.trim());
-      return chosen;
+      return chosen.map(label => label.id ? { id: label.id } : { name: label.name });
     },
   };
 }

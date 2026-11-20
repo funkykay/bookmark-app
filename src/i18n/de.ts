@@ -92,6 +92,8 @@ export const de = {
   missingName: 'Bitte einen Namen eingeben.',
   invalidUrl: 'Bitte eine gültige Webadresse eingeben.',
   loadFailed: 'Lokale Lesezeichen konnten nicht geladen werden. Änderungen sind gesperrt.',
+  libraryConflict: 'Die Daten wurden inzwischen geändert. Öffne den Eintrag erneut oder wiederhole den Vorgang mit dem aktuellen Stand.',
+  invalidLabel: 'Bitte einen gültigen Labelnamen und eine gültige Farbe wählen.',
   saveFailed: 'Speichern nicht möglich. Bitte die Browser-Einstellungen prüfen.',
   appearanceSession: 'Darstellung nur für diese Sitzung übernommen.',
   appearanceResetFailed: 'Darstellung konnte nicht zurückgesetzt werden.',
