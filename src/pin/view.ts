@@ -1,4 +1,5 @@
 import { messages } from '../i18n';
+import { storage } from '../storage';
 import type { View } from '../views';
 import { element } from '../dom';
 import { createPinSettings, loadPinSettings, matchesPin, savePinSettings } from './model';
@@ -127,37 +128,41 @@ export function initPin({ notify, onGateChange }: Options) {
           return;
         }
         const next = await createPinSettings(pin);
-        if (gate !== current) return;
-        if (persist(next)) {
-          closeGate();
-          notify(current.purpose === 'change' ? messages().pinChanged : messages().pinEnabled);
-        } else {
-          goTo({ mode: 'create', purpose: current.purpose }, messages().unableToSave);
-        }
+        await storage.withLibraryLock(() => {
+          if (gate !== current) return;
+          if (persist(next)) {
+            closeGate();
+            notify(current.purpose === 'change' ? messages().pinChanged : messages().pinEnabled);
+          } else {
+            goTo({ mode: 'create', purpose: current.purpose }, messages().unableToSave);
+          }
+        });
         return;
       }
 
       const previous = settings;
       if (!previous) return;
       const correct = await matchesPin(pin, previous);
-      if (gate !== current) return;
-      if (!correct) {
-        registerFailure(previous);
-      } else if (current.mode === 'verify-disable') {
-        if (persist(null)) {
-          closeGate();
-          notify(messages().pinDisabled);
+      await storage.withLibraryLock(() => {
+        if (gate !== current) return;
+        if (!correct) {
+          registerFailure(previous);
+        } else if (current.mode === 'verify-disable') {
+          if (persist(null)) {
+            closeGate();
+            notify(messages().pinDisabled);
+          } else {
+            error = messages().disableFailed;
+          }
         } else {
-          error = messages().disableFailed;
+          if (settings?.attempts || settings?.lockUntil) {
+            settings = { ...previous, attempts: 0, lockUntil: 0 };
+            persist(settings);
+          }
+          if (current.mode === 'verify-change') goTo({ mode: 'create', purpose: 'change' });
+          else closeGate();
         }
-      } else {
-        if (settings?.attempts || settings?.lockUntil) {
-          settings = { ...previous, attempts: 0, lockUntil: 0 };
-          persist(settings);
-        }
-        if (current.mode === 'verify-change') goTo({ mode: 'create', purpose: 'change' });
-        else closeGate();
-      }
+      });
     } catch {
       if (gate === current) error = messages().pinFailed;
     } finally {
@@ -207,12 +212,15 @@ export function initPin({ notify, onGateChange }: Options) {
   window.setInterval(() => { if (isVerifying() && settings?.lockUntil) renderGate(); }, 1000);
 
   const view: View = { path: '/pin', root: element('pinGate', 'main') };
+  storage.onReset(() => {
+    settings = loadPinSettings();
+    if (!settings && gate) closeGate();
+  });
   return {
     view,
     get active() { return gate !== null; },
     get enabled() { return Boolean(settings); },
     lock: lockApp,
-    clearSettings() { return persist(null); },
     toggleProtection() {
       if (settings) openGate({ mode: 'verify-disable' });
       else openGate({ mode: 'create', purpose: 'enable' });

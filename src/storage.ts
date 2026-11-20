@@ -9,7 +9,9 @@ export interface AppStorage {
   lastChange(): string | null;
   recordExport(exportedAt: Date, lastChange: string | null): void;
   hasCurrentBackup(): boolean;
-  clearBackupHistory(): void;
+  hasPendingReset(): boolean;
+  resetApp(emptyLibrary?: string): Promise<boolean>;
+  onReset(listener: () => void): void;
   onBackupChange(listener: () => void): void;
 }
 
@@ -22,7 +24,12 @@ const localStorageKeys: Record<StorageKey, string> = {
 
 const lastChangeKey = 'donni-bookmark-last-change';
 const lastExportKey = 'donni-bookmark-last-export';
-const backupEvents = new EventTarget();
+const pendingResetKey = 'donni-bookmark-pending-reset';
+const storageEvents = new EventTarget();
+
+function requireWritableStorage(): void {
+  if (localStorage.getItem(pendingResetKey) !== null) throw new Error('Reset in progress');
+}
 
 function setItem(key: string, value: string | null): void {
   if (value === null) localStorage.removeItem(key);
@@ -30,6 +37,7 @@ function setItem(key: string, value: string | null): void {
 }
 
 function update(key: StorageKey, value: string | null): void {
+  requireWritableStorage();
   const item = localStorageKeys[key];
   const previous = localStorage.getItem(item);
   if (previous === value) return;
@@ -44,7 +52,7 @@ function update(key: StorageKey, value: string | null): void {
     if (localStorage.getItem(item) === value) setItem(item, previous);
     throw error;
   }
-  backupEvents.dispatchEvent(new Event('change'));
+  storageEvents.dispatchEvent(new Event('change'));
 }
 
 // On plain HTTP Web Locks are unavailable. A read/write IndexedDB transaction
@@ -94,8 +102,9 @@ export const storage: AppStorage = {
     return localStorage.getItem(lastChangeKey);
   },
   recordExport(exportedAt, lastChange) {
+    requireWritableStorage();
     localStorage.setItem(lastExportKey, JSON.stringify({ exportedAt: exportedAt.toISOString(), lastChange }));
-    backupEvents.dispatchEvent(new Event('change'));
+    storageEvents.dispatchEvent(new Event('change'));
   },
   hasCurrentBackup() {
     try {
@@ -106,16 +115,48 @@ export const storage: AppStorage = {
       return false;
     }
   },
-  clearBackupHistory() {
-    localStorage.removeItem(lastExportKey);
-    localStorage.removeItem(lastChangeKey);
-    backupEvents.dispatchEvent(new Event('change'));
+  hasPendingReset() {
+    try {
+      return localStorage.getItem(pendingResetKey) !== null;
+    } catch {
+      return false;
+    }
+  },
+  resetApp(emptyLibrary) {
+    return this.withLibraryLock(() => {
+      let target = localStorage.getItem(pendingResetKey);
+      if (target === null) {
+        if (emptyLibrary === undefined || !this.hasCurrentBackup()) return false;
+        // Persist the confirmed target, including its new generation, before deleting anything.
+        localStorage.setItem(pendingResetKey, emptyLibrary);
+        target = emptyLibrary;
+      }
+      try {
+        localStorage.setItem(localStorageKeys.bookmarks, target);
+        localStorage.removeItem(localStorageKeys.appearance);
+        localStorage.removeItem(localStorageKeys.language);
+        localStorage.removeItem(localStorageKeys.pin);
+        localStorage.removeItem(lastExportKey);
+        localStorage.removeItem(lastChangeKey);
+        localStorage.removeItem(pendingResetKey);
+      } finally {
+        storageEvents.dispatchEvent(new Event('change'));
+      }
+      storageEvents.dispatchEvent(new Event('reset'));
+      return true;
+    });
+  },
+  onReset(listener) {
+    storageEvents.addEventListener('reset', listener);
+    window.addEventListener('storage', event => {
+      if (event.storageArea === localStorage && event.key === pendingResetKey && event.newValue === null) listener();
+    });
   },
   onBackupChange(listener) {
-    backupEvents.addEventListener('change', listener);
+    storageEvents.addEventListener('change', listener);
     window.addEventListener('storage', event => {
       if (event.storageArea !== localStorage) return;
-      if (event.key === lastChangeKey || event.key === lastExportKey || event.key === null) listener();
+      if (event.key === lastChangeKey || event.key === lastExportKey || event.key === pendingResetKey || event.key === null) listener();
     });
   },
 };

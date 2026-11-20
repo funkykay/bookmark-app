@@ -32,29 +32,18 @@ export function initAppearance(notify: (message: string) => void) {
     apply();
   }
 
-  form.addEventListener('change', () => {
+  form.addEventListener('change', async () => {
     setPosition(mobileWidth.valueAsNumber);
     apply();
     try {
-      storage.write('appearance', JSON.stringify({ mode: mode.value, palette: palette.value, mobileWidth: mobileWidth.valueAsNumber }));
+      const saved = JSON.stringify({ mode: mode.value, palette: palette.value, mobileWidth: mobileWidth.valueAsNumber });
+      await storage.withLibraryLock(() => storage.write('appearance', saved));
     } catch {
       notify(messages().appearanceSession);
     }
   });
   systemDark.addEventListener('change', apply);
   storage.onExternalChange('appearance', restore);
+  storage.onReset(restore);
   restore();
-
-  return function clearAppearance(): boolean {
-    try {
-      storage.remove('appearance');
-    } catch {
-      notify(messages().appearanceResetFailed);
-      return false;
-    }
-    form.reset();
-    setPosition(undefined);
-    apply();
-    return true;
-  };
 }

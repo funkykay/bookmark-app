@@ -4,7 +4,7 @@ import { LibraryError } from './operations.js';
 import type { Change, LibraryIssue } from './operations.js';
 import { storage } from '../storage.js';
 
-export type WriteIssue = LibraryIssue | 'saveFailed' | 'loadFailed';
+export type WriteIssue = LibraryIssue | 'saveFailed' | 'loadFailed' | 'resetFailed';
 export type WriteResult<T> = { ok: true; value: T } | { ok: false; issue: WriteIssue };
 
 export function createBookmarkStore(report: (issue: WriteIssue) => void, onChange: () => void, adapter = storage) {
@@ -21,12 +21,11 @@ export function createBookmarkStore(report: (issue: WriteIssue) => void, onChang
     raw = stored;
   }
 
-  function persist(next: Library, nextGeneration = generation): void {
-    const stored = serializeLibrary(next, nextGeneration);
+  function persist(next: Library): void {
+    const stored = serializeLibrary(next, generation);
     adapter.write('bookmarks', stored);
     raw = stored;
     data = next;
-    generation = nextGeneration;
   }
 
   try {
@@ -35,7 +34,7 @@ export function createBookmarkStore(report: (issue: WriteIssue) => void, onChang
     report('loadFailed');
   }
 
-  adapter.onExternalChange('bookmarks', () => {
+  function refresh(): void {
     const before = data;
     try {
       load();
@@ -43,7 +42,8 @@ export function createBookmarkStore(report: (issue: WriteIssue) => void, onChang
       report('loadFailed');
     }
     if (before !== data) onChange();
-  });
+  }
+  adapter.onExternalChange('bookmarks', refresh);
 
   async function change<T>(expectedGeneration: string | undefined, operation: (latest: Library) => Change<T>): Promise<WriteResult<T>> {
     try {
@@ -85,19 +85,15 @@ export function createBookmarkStore(report: (issue: WriteIssue) => void, onChang
         return { library: bookmarks || labels ? merged : latest, value: { bookmarks, labels } };
       });
     },
-    async reset(clearSettings: () => boolean): Promise<boolean> {
+    async reset(mode: 'start' | 'resume' = 'start'): Promise<boolean> {
       try {
-        return await adapter.withLibraryLock(() => {
-          if (!adapter.hasCurrentBackup()) return false;
-          persist({ bookmarks: [], labels: [] }, createId());
-          onChange();
-          if (!clearSettings()) return false;
-          adapter.clearBackupHistory();
-          return true;
-        });
+        const target = mode === 'start' ? serializeLibrary({ bookmarks: [], labels: [] }, createId()) : undefined;
+        return await adapter.resetApp(target);
       } catch {
-        report('saveFailed');
+        report('resetFailed');
         return false;
+      } finally {
+        refresh();
       }
     },
   };

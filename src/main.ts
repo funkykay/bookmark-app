@@ -8,10 +8,11 @@ import { initPin } from './pin/view';
 import { initLegalViews, legacyLegalUrl } from './legal/views';
 import { initLanguage } from './settings/language';
 import { initSettings } from './settings/view';
+import { storage } from './storage';
 import { createNavigation } from './views';
 
 const notify = createToast();
-const clearLanguage = initLanguage(notify);
+initLanguage(notify);
 
 const legacyUrl = __LEGAL_PAGES__ && legacyLegalUrl();
 if (legacyUrl) location.replace(legacyUrl);
@@ -24,7 +25,7 @@ function startApp() {
     onGateChange() { navigation.syncFromUrl(); },
   });
 
-  const settings = initSettings({ store, pin, notify, clearLanguage });
+  const settings = initSettings({ store, pin, notify });
   const navigation = createNavigation({
     bookmarks: initBookmarks({ store, pin }),
     labels: initLabels(store),
@@ -39,4 +40,5 @@ function startApp() {
 
   if (pin.enabled) pin.lock();
   else navigation.syncFromUrl();
+  if (storage.hasPendingReset()) void store.reset('resume');
 }

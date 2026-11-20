@@ -1,6 +1,6 @@
 # Aufgaben aus dem Code-Review
 
-- [ ] **BM-001 · Unterbrochenen Reset fortsetzen**  
+- [x] **BM-001 · Unterbrochenen Reset fortsetzen**\
   **Problem:** Ein fehlgeschlagener Reset kann alle Lesezeichen löschen und einzelne Einstellungen zurücklassen.  
   **Lösung:** Bündle alle Löschschritte in einem Reset, der nach einem Fehler zuverlässig fortgesetzt werden kann.
 

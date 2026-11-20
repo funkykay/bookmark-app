@@ -10,8 +10,7 @@ import { initAppearance } from './appearance';
 
 interface Options {
   store: BookmarkStore;
-  clearLanguage: () => boolean;
-  pin: Pick<PinControls, 'enabled' | 'toggleProtection' | 'changePin' | 'clearSettings'>;
+  pin: Pick<PinControls, 'enabled' | 'toggleProtection' | 'changePin'>;
   notify: (message: string) => void;
 }
 
@@ -22,16 +21,18 @@ function filenameTimestamp(date: Date): string {
   return `${day}_${time}`;
 }
 
-export function initSettings({ store, pin, notify, clearLanguage }: Options): View {
-  const clearAppearance = initAppearance(notify);
+export function initSettings({ store, pin, notify }: Options): View {
+  initAppearance(notify);
   const pinSwitch = element('pinSwitch', 'button');
   const changeButton = element('changePinButton', 'button');
 
   const importFile = element('importFile', 'input');
+  const exportButton = element('exportButton', 'button');
   const purgeButton = element('purgeButton', 'button');
   const purgeHint = element('purgeHint', 'p');
 
   function exportBookmarks(): void {
+    if (storage.hasPendingReset()) return;
     const exportedAt = new Date();
     let lastChange: string | null;
     let output: string;
@@ -80,15 +81,20 @@ export function initSettings({ store, pin, notify, clearLanguage }: Options): Vi
   }
 
   async function purgeData(): Promise<void> {
-    if (!storage.hasCurrentBackup() || !window.confirm(messages().confirmPurge)) return;
-    if (await store.reset(() => pin.clearSettings() && clearAppearance() && clearLanguage())) {
-      render();
+    const pending = storage.hasPendingReset();
+    if (!pending && (!storage.hasCurrentBackup() || !window.confirm(messages().confirmPurge))) return;
+    if (await store.reset(pending ? 'resume' : 'start')) {
       notify(messages().purged);
     }
   }
 
   function updatePurgeButton(): void {
-    purgeButton.disabled = !storage.hasCurrentBackup();
+    const pending = storage.hasPendingReset();
+    const label = pending ? 'resumePurge' : 'purge';
+    exportButton.disabled = pending;
+    purgeButton.dataset.i18n = label;
+    purgeButton.textContent = messages()[label];
+    purgeButton.disabled = !pending && !storage.hasCurrentBackup();
     purgeHint.hidden = !purgeButton.disabled;
   }
 
@@ -103,11 +109,14 @@ export function initSettings({ store, pin, notify, clearLanguage }: Options): Vi
   pinSwitch.addEventListener('click', pin.toggleProtection);
   changeButton.addEventListener('click', pin.changePin);
 
-  element('exportButton', 'button').addEventListener('click', exportBookmarks);
+  exportButton.addEventListener('click', () => {
+    storage.withLibraryLock(exportBookmarks).catch(() => notify(messages().saveFailed));
+  });
   element('importButton', 'button').addEventListener('click', () => importFile.click());
   importFile.addEventListener('change', importBookmarks);
   purgeButton.addEventListener('click', purgeData);
   storage.onBackupChange(updatePurgeButton);
+  storage.onReset(render);
 
   return {
     path: '/settings',

@@ -24,7 +24,13 @@ function sharedStorage(initial = null) {
     },
     onExternalChange(_, listener) { listeners.push(listener); },
     hasCurrentBackup: () => backedUp,
-    clearBackupHistory() { backedUp = false; },
+    resetApp(target) {
+      return this.withLibraryLock(() => {
+        if (!backedUp || target === undefined) return false;
+        this.write('bookmarks', target);
+        return true;
+      });
+    },
   };
   return {
     adapter,
@@ -71,9 +77,9 @@ test('reset invalidates open editors and in-flight imports, even for an empty li
   const b = disk.open();
   const before = a.generation;
   const incoming = saveBookmark(empty(), bookmark('Old')).library;
-  assert.equal(await b.reset(() => assert.fail('reset without current backup')), false);
+  assert.equal(await b.reset(), false);
   disk.markExported();
-  assert.equal(await b.reset(() => true), true);
+  assert.equal(await b.reset(), true);
   assert.deepEqual(await a.importBackup(before, incoming), { ok: false, issue: 'libraryConflict' });
   assert.deepEqual(await a.change(before, lib => saveLabel(lib, label('Stale'))), { ok: false, issue: 'libraryConflict' });
   assert.deepEqual(a.data, empty());
@@ -89,7 +95,7 @@ test('reset rechecks its backup after earlier queued writes have completed', asy
   const b = disk.open();
   disk.markExported();
   const saved = a.change(a.generation, lib => saveBookmark(lib, bookmark('Keep')));
-  const reset = b.reset(() => assert.fail('backup was invalidated'));
+  const reset = b.reset();
   assert.ok((await saved).ok);
   assert.equal(await reset, false);
   assert.equal(JSON.parse(b.exportBackup()).bookmarks.length, 1);
