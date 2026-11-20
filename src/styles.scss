@@ -213,6 +213,19 @@ h1 {
   }
 }
 
+.reset-search {
+  flex: none;
+  border: 1px solid var(--line);
+  color: var(--muted);
+
+  &:hover:enabled {
+    background: var(--accent-tint);
+    color: var(--accent);
+  }
+
+  &:disabled { opacity: .45; }
+}
+
 .bookmarks {
   display: grid;
   gap: 9px;

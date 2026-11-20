@@ -43,6 +43,7 @@ export const de = {
   addBookmark: 'Lesezeichen hinzufügen',
   search: 'Suchen',
   searchBookmarks: 'Lesezeichen suchen',
+  resetSearch: 'Suche und Label-Filter zurücksetzen',
   noBookmarks: 'Noch keine Lesezeichen',
   add: 'Hinzufügen',
   done: 'Fertig',

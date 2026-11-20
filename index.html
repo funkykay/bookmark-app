@@ -16,9 +16,6 @@
         <svg class="app-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 2h14v20l-7-4.5L5 22z" fill="currentColor"/></svg>
         <span data-i18n="bookmarks"></span>
       </button>
-      <button id="desktopAdd" class="icon-button" type="button" data-i18n-aria-label="addBookmark" data-i18n-title="addBookmark" hidden>
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-      </button>
       <button class="icon-button" type="button" data-view="labels" data-i18n-aria-label="labels" data-i18n-title="labels">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h8l10 10-8 8L3 11z"/><circle cx="7.5" cy="7.5" r="1" fill="currentColor" stroke="none"/></svg>
       </button>
@@ -55,6 +52,12 @@
         <input id="search" type="search" data-i18n-placeholder="search" autocomplete="off" data-i18n-aria-label="searchBookmarks">
       </div>
       <select id="labelFilter" class="label-filter" data-i18n-aria-label="filterByLabel" hidden></select>
+      <button id="resetSearch" class="icon-button reset-search" type="button" data-i18n-aria-label="resetSearch" data-i18n-title="resetSearch" disabled>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v6h6"/><path d="M4.6 9a8 8 0 1 1-.2 5"/></svg>
+      </button>
+      <button id="desktopAdd" class="desktop-only icon-button primary" type="button" data-i18n-aria-label="addBookmark" data-i18n-title="addBookmark">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
     </div>
     <ul id="list" class="bookmarks" role="list"></ul>
     <div id="empty" class="empty" hidden>

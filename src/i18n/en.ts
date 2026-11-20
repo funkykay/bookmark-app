@@ -45,6 +45,7 @@ export const en = {
   addBookmark: 'Add bookmark',
   search: 'Search',
   searchBookmarks: 'Search bookmarks',
+  resetSearch: 'Reset search and label filter',
   noBookmarks: 'No bookmarks yet',
   add: 'Add',
   done: 'Done',

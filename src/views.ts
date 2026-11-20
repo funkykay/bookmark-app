@@ -15,7 +15,6 @@ export function createNavigation(views: Registry, pinActive: () => boolean) {
   let current: View | undefined;
   const byPath = new Map<string, View>(Object.values(views).map(view => [view.path, view]));
   const desktopNav = element('desktopNav', 'nav');
-  const desktopAdd = element('desktopAdd', 'button');
   const controls = document.querySelectorAll<HTMLButtonElement | HTMLAnchorElement>('[data-view]');
 
   for (const control of controls) {
@@ -35,7 +34,6 @@ export function createNavigation(views: Registry, pinActive: () => boolean) {
     }
     current = next;
     desktopNav.hidden = next === views.pin || next.public === true;
-    desktopAdd.hidden = next !== views.bookmarks;
     for (const control of controls) {
       if (views[control.dataset.view as keyof Registry] === next) control.setAttribute('aria-current', 'page');
       else control.removeAttribute('aria-current');

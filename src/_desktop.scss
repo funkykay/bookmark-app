@@ -1,4 +1,4 @@
-.desktop-only, .desktop-nav {
+.desktop-only, .icon-button.desktop-only, .desktop-nav {
   display: none;
 }
 
@@ -62,7 +62,7 @@
   #bookmarksView .actions { margin-inline-start: auto; }
   #bookmarksView header:has(#desktopLock[hidden]) { margin-bottom: 0; }
 
-  .desktop-only { display: inline; }
+  .desktop-only { display: grid; }
   #menuButton, #popup, #addButton { display: none; }
 
   .search-row {
@@ -72,7 +72,8 @@
     margin-bottom: 24px;
 
     .search { flex: 1 1 240px; }
-    .search, .label-filter { height: 42px; border-radius: 9px; }
+    .search, .label-filter, button { height: 42px; border-radius: 9px; }
+    .icon-button { width: 42px; }
     .label-filter { max-width: min(100%, 20rem); }
   }
 

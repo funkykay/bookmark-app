@@ -18,6 +18,7 @@ export function initBookmarks({ store, pin }: Options): View {
   const root = element('bookmarksView', 'main');
   const list = element('list', 'ul');
   const search = element('search', 'input');
+  const resetSearch = element('resetSearch', 'button');
   const labelFilter = element('labelFilter', 'select');
   const picker = initLabelPicker();
   const editor = element('editor', 'dialog');
@@ -77,6 +78,7 @@ export function initBookmarks({ store, pin }: Options): View {
   function renderList(): void {
     const query = search.value.trim().toLocaleLowerCase(currentLanguage());
     const selected = labelFilter.value;
+    resetSearch.disabled = !search.value && !selected;
     const shown = store.data.bookmarks.filter(({ name, url, labelIds }) =>
       (!selected || labelIds.includes(selected))
       && `${name} ${url}`.toLocaleLowerCase(currentLanguage()).includes(query));
@@ -153,6 +155,12 @@ export function initBookmarks({ store, pin }: Options): View {
   element('desktopAdd', 'button').addEventListener('click', () => openEditor());
   emptyAdd.addEventListener('click', () => openEditor());
   search.addEventListener('input', renderList);
+  resetSearch.addEventListener('click', () => {
+    search.value = '';
+    labelFilter.value = '';
+    renderList();
+    search.focus();
+  });
   document.addEventListener('keydown', (event) => {
     if (root.hidden || document.documentElement.dataset.layout !== 'desktop' || editor.open || !menu.hidden) return;
     if (event.defaultPrevented || event.isComposing || event.metaKey) return;
