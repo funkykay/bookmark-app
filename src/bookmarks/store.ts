@@ -34,6 +34,15 @@ export function createBookmarkStore(report: (issue: WriteIssue) => void, onChang
     report('loadFailed');
   }
 
+  function notifyIfChanged(before: Library): void {
+    if (before === data) return;
+    try {
+      onChange();
+    } catch (error) {
+      console.error('Failed to refresh the library view', error);
+    }
+  }
+
   function refresh(): void {
     const before = data;
     try {
@@ -41,7 +50,7 @@ export function createBookmarkStore(report: (issue: WriteIssue) => void, onChang
     } catch {
       report('loadFailed');
     }
-    if (before !== data) onChange();
+    notifyIfChanged(before);
   }
   adapter.onExternalChange('bookmarks', refresh);
 
@@ -60,7 +69,7 @@ export function createBookmarkStore(report: (issue: WriteIssue) => void, onChang
           if (library !== data) persist(library);
           return { ok: true, value };
         } finally {
-          if (before !== data) onChange();
+          notifyIfChanged(before);
         }
       });
     } catch (error) {

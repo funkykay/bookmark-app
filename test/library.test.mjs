@@ -57,6 +57,24 @@ test('independent writes from two tabs survive before any storage event is deliv
   assert.equal(refreshes, 2);
 });
 
+test('a render error preserves the write result for both a saved bookmark and a stale edit', async t => {
+  const disk = sharedStorage();
+  const renderError = new Error('Render failed');
+  const log = t.mock.method(console, 'error', () => {});
+  const tab = disk.open(() => { throw renderError; });
+  const saved = await tab.change(tab.generation, lib => saveBookmark(lib, bookmark('First')));
+  assert.ok(saved.ok);
+  const other = disk.open();
+  assert.deepEqual(other.data.bookmarks, [saved.value]);
+
+  const edited = await other.change(other.generation, lib => saveBookmark(lib, bookmark('Updated'), saved.value));
+  assert.ok(edited.ok);
+  const stale = await tab.change(tab.generation, lib => saveBookmark(lib, bookmark('Stale'), saved.value));
+  assert.deepEqual(stale, { ok: false, issue: 'libraryConflict' });
+  assert.deepEqual(tab.data.bookmarks, [edited.value]);
+  assert.deepEqual(log.mock.calls.map(call => call.arguments.at(-1)), [renderError, renderError]);
+});
+
 test('stale edits and deletes cannot overwrite a changed or deleted item', async () => {
   const disk = sharedStorage();
   const a = disk.open();

@@ -4,7 +4,7 @@
   **Problem:** Ein fehlgeschlagener Reset kann alle Lesezeichen löschen und einzelne Einstellungen zurücklassen.  
   **Lösung:** Bündle alle Löschschritte in einem Reset, der nach einem Fehler zuverlässig fortgesetzt werden kann.
 
-- [ ] **BM-002 · Speichererfolg unabhängig vom Rendern melden**  
+- [x] **BM-002 · Speichererfolg unabhängig vom Rendern melden**\
   **Problem:** Wenn die Ansicht nach dem Speichern einen Fehler wirft, meldet die App den bereits gespeicherten Eintrag als fehlgeschlagen.  
   **Lösung:** Bestätige den Schreibvorgang unabhängig davon, ob die anschließende Aktualisierung der Ansicht gelingt.
 
