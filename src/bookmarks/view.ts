@@ -2,7 +2,8 @@ import { currentLanguage, messages } from '../i18n';
 import { element } from '../dom';
 import type { View } from '../views';
 import type { PinControls } from '../pin/view';
-import { createBookmarkCard } from './card';
+import { filterBookmarks } from './filter';
+import { createBookmarkList } from './list';
 import { deleteBookmark, saveBookmark } from './operations';
 import { createLibraryEditor } from './editor';
 import { labelBadge, sortedLabels } from '../labels/display';
@@ -17,7 +18,10 @@ interface Options {
 
 export function initBookmarks({ store, pin }: Options): View {
   const root = element('bookmarksView', 'main');
-  const list = element('list', 'ul');
+  const list = createBookmarkList(element('list', 'ul'), id => {
+    const bookmark = store.data.bookmarks.find(item => item.id === id);
+    if (bookmark) openEditor(bookmark);
+  });
   const search = element('search', 'input');
   const resetSearch = element('resetSearch', 'button');
   const labelFilter = element('labelFilter', 'button');
@@ -95,6 +99,7 @@ export function initBookmarks({ store, pin }: Options): View {
   function render(): void {
     lockButton.hidden = !pin.enabled;
     desktopLock.hidden = !pin.enabled;
+    list.retain(store.data.bookmarks);
     labels = new Map(store.data.labels.map(label => [label.id, label]));
     const used = new Set(store.data.bookmarks.flatMap(bookmark => bookmark.labelIds));
     const sorted = sortedLabels(store.data.labels.filter(label => used.has(label.id)));
@@ -104,18 +109,12 @@ export function initBookmarks({ store, pin }: Options): View {
   }
 
   function renderList(): void {
-    const query = search.value.trim().toLocaleLowerCase(currentLanguage());
-    resetSearch.disabled = !search.value && !selectedLabelId;
-    const shown = store.data.bookmarks.filter(({ name, url, labelIds }) =>
-      (!selectedLabelId || labelIds.includes(selectedLabelId))
-      && `${name} ${url}`.toLocaleLowerCase(currentLanguage()).includes(query));
-    const fragment = document.createDocumentFragment();
-    for (const bookmark of shown) {
-      fragment.append(createBookmarkCard(bookmark, labels, openEditor));
-    }
-    list.replaceChildren(fragment);
+    const { bookmarks } = store.data;
+    const shown = filterBookmarks(bookmarks, search.value, selectedLabelId, currentLanguage());
+    list.render(shown, labels);
 
-    const searching = Boolean(store.data.bookmarks.length && query);
+    resetSearch.disabled = !search.value && !selectedLabelId;
+    const searching = Boolean(bookmarks.length && search.value.trim());
     empty.hidden = shown.length > 0;
     emptyText.textContent = searching ? messages().noResults : messages().noBookmarks;
     emptyAdd.hidden = searching;

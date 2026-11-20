@@ -7,5 +7,5 @@
     "rootDir": "src",
     "outDir": ".local/test-build"
   },
-  "include": ["src/bookmarks/store.ts"]
+  "include": ["src/bookmarks/store.ts", "src/bookmarks/filter.ts"]
 }

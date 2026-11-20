@@ -12,7 +12,7 @@
 <body>
   <nav id="desktopNav" class="desktop-nav" data-i18n-aria-label="navigation" hidden>
     <div class="desktop-nav-inner">
-      <button type="button" data-view="bookmarks">
+      <button class="nav-home" type="button" data-view="bookmarks">
         <svg class="app-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 2h14v20l-7-4.5L5 22z" fill="currentColor"/></svg>
         <span data-i18n="bookmarks"></span>
       </button>
@@ -28,19 +28,19 @@
     </div>
   </nav>
   <main id="bookmarksView" class="app" aria-labelledby="bookmarksTitle" hidden>
-    <header>
-      <h1 id="bookmarksTitle" tabindex="-1" data-i18n="bookmarks"></h1>
+    <header class="bookmarks-header">
+      <h1 id="bookmarksTitle" class="desktop-sr-only" tabindex="-1" data-i18n="bookmarks"></h1>
       <div class="actions">
         <button id="desktopLock" class="desktop-only done-button" type="button" hidden data-i18n="lockNow"></button>
-        <button id="menuButton" class="icon-button" type="button" data-i18n-aria-label="moreOptions" aria-controls="popup" aria-expanded="false">
+        <button id="menuButton" class="mobile-only icon-button" type="button" data-i18n-aria-label="moreOptions" aria-controls="popup" aria-expanded="false">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>
         </button>
-        <div id="popup" class="popup" hidden>
+        <div id="popup" class="mobile-only popup" hidden>
           <button id="labelsButton" data-view="labels" type="button" data-i18n="labels"></button>
           <button id="settingsButton" data-view="settings" type="button" data-i18n="settings"></button>
           <button id="lockButton" type="button" hidden data-i18n="lockNow"></button>
         </div>
-        <button id="addButton" class="icon-button primary" type="button" data-i18n-aria-label="addBookmark">
+        <button id="addButton" class="mobile-only icon-button primary" type="button" data-i18n-aria-label="addBookmark">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
         </button>
       </div>
@@ -63,7 +63,7 @@
       </button>
     </div>
     <div id="labelTiles" class="label-tiles" role="group" data-i18n-aria-label="filterByLabel" hidden></div>
-    <ul id="list" class="bookmarks" role="list"></ul>
+    <ul id="list" class="library-list" role="list"></ul>
     <div id="empty" class="empty" hidden>
       <span id="emptyText"></span>
       <button id="emptyAdd" type="button" data-i18n="add"></button>
@@ -107,7 +107,7 @@
         <button id="backFromLabels" data-view="bookmarks" class="done-button" type="button" data-i18n="done"></button>
       </div>
     </header>
-    <ul id="managedLabels" class="bookmarks" role="list"></ul>
+    <ul id="managedLabels" class="library-list" role="list"></ul>
     <p id="labelsEmpty" class="empty" data-i18n="noLabels"></p>
   </main>
 
@@ -125,21 +125,21 @@
     </form>
   </dialog>
 
-  <main id="settingsView" class="app" aria-labelledby="settingsTitle" hidden>
+  <main id="settingsView" class="app settings-view" aria-labelledby="settingsTitle" hidden>
     <header>
       <h1 id="settingsTitle" tabindex="-1" data-i18n="settings"></h1>
       <button id="backFromSettings" data-view="bookmarks" class="done-button" type="button" data-i18n="back"></button>
     </header>
     <section class="settings-group" aria-labelledby="languageTitle">
       <h2 id="languageTitle" data-i18n="language"></h2>
-      <select id="languageSelect" aria-labelledby="languageTitle">
+      <select id="languageSelect" class="language-select" aria-labelledby="languageTitle">
         <option value="de" lang="de">Deutsch</option>
         <option value="en" lang="en">English</option>
       </select>
     </section>
-    <section class="settings-group" aria-labelledby="appearanceTitle">
+    <section class="settings-group settings-appearance" aria-labelledby="appearanceTitle">
       <h2 id="appearanceTitle" data-i18n="appearance"></h2>
-      <form id="appearanceForm">
+      <form id="appearanceForm" class="appearance-form">
         <fieldset>
           <legend data-i18n="mode"></legend>
           <div class="mode-options">
