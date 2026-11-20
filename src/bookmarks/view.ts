@@ -4,7 +4,7 @@ import type { View } from '../views';
 import type { PinControls } from '../pin/view';
 import { createBookmarkCard } from './card';
 import { createId, labelKey, maxNameLength, normalizeUrl } from './model';
-import { sortedLabels } from '../labels/display';
+import { labelBadge, sortedLabels } from '../labels/display';
 import { initLabelPicker } from '../labels/picker';
 import type { Bookmark, Label } from './model';
 import type { BookmarkStore } from './store';
@@ -19,7 +19,9 @@ export function initBookmarks({ store, pin }: Options): View {
   const list = element('list', 'ul');
   const search = element('search', 'input');
   const resetSearch = element('resetSearch', 'button');
-  const labelFilter = element('labelFilter', 'select');
+  const labelFilter = element('labelFilter', 'button');
+  const labelFilterName = element('labelFilterName', 'span');
+  const labelTiles = element('labelTiles', 'div');
   const picker = initLabelPicker();
   const editor = element('editor', 'dialog');
   const editorTitle = element('editorTitle', 'h2');
@@ -61,26 +63,49 @@ export function initBookmarks({ store, pin }: Options): View {
 
   let editingId: string | null = null;
   let labels = new Map<string, Label>();
+  let selectedLabelId = '';
+
+  function closeLabelTiles(): void {
+    labelTiles.hidden = true;
+    labelFilter.setAttribute('aria-expanded', 'false');
+  }
+
+  function selectLabel(id: string): void {
+    selectedLabelId = id;
+    labelFilterName.textContent = labels.get(id)?.name ?? messages().labels;
+    labelFilter.classList.toggle('active', Boolean(id));
+    closeLabelTiles();
+    renderList();
+  }
+
+  function filterTile(label?: Label): HTMLButtonElement {
+    const tile = document.createElement('button');
+    tile.type = 'button';
+    tile.value = label?.id ?? '';
+    tile.append(label ? labelBadge(label) : messages().allLabels);
+    tile.addEventListener('click', () => {
+      selectLabel(tile.value);
+      labelFilter.focus();
+    });
+    return tile;
+  }
 
   function render(): void {
     lockButton.hidden = !pin.enabled;
     desktopLock.hidden = !pin.enabled;
-    const previousFilter = labelFilter.value;
     labels = new Map(store.data.labels.map(label => [label.id, label]));
     const used = new Set(store.data.bookmarks.flatMap(bookmark => bookmark.labelIds));
     const sorted = sortedLabels(store.data.labels.filter(label => used.has(label.id)));
-    labelFilter.replaceChildren(new Option(messages().allLabels, ''), ...sorted.map(label => new Option(label.name, label.id)));
-    labelFilter.value = used.has(previousFilter) ? previousFilter : '';
+    labelTiles.replaceChildren(filterTile(), ...sorted.map(filterTile));
     labelFilter.hidden = sorted.length === 0;
-    renderList();
+    selectLabel(used.has(selectedLabelId) && labels.has(selectedLabelId) ? selectedLabelId : '');
   }
 
   function renderList(): void {
     const query = search.value.trim().toLocaleLowerCase(currentLanguage());
-    const selected = labelFilter.value;
-    resetSearch.disabled = !search.value && !selected;
+    resetSearch.disabled = !search.value && !selectedLabelId;
     const shown = store.data.bookmarks.filter(({ name, url, labelIds }) =>
-      (!selected || labelIds.includes(selected))
+      (!selectedLabelId || labelIds.includes(selectedLabelId))
       && `${name} ${url}`.toLocaleLowerCase(currentLanguage()).includes(query));
     const fragment = document.createDocumentFragment();
     for (const bookmark of shown) {
@@ -96,11 +121,12 @@ export function initBookmarks({ store, pin }: Options): View {
 
   function openEditor(bookmark?: Bookmark): void {
     closeMenu();
+    closeLabelTiles();
     editingId = bookmark?.id ?? null;
     editorTitle.textContent = bookmark ? messages().editBookmark : messages().addBookmark;
     nameInput.value = bookmark?.name ?? '';
     urlInput.value = bookmark?.url ?? '';
-    const ids = bookmark?.labelIds ?? [labelFilter.value];
+    const ids = bookmark?.labelIds ?? [selectedLabelId];
     picker.reset(store.data.labels, ids.map(id => labels.get(id)).filter(label => label !== undefined));
     deleteButton.hidden = !bookmark;
     error.textContent = '';
@@ -157,8 +183,7 @@ export function initBookmarks({ store, pin }: Options): View {
   search.addEventListener('input', renderList);
   resetSearch.addEventListener('click', () => {
     search.value = '';
-    labelFilter.value = '';
-    renderList();
+    selectLabel('');
     search.focus();
   });
   document.addEventListener('keydown', (event) => {
@@ -172,7 +197,25 @@ export function initBookmarks({ store, pin }: Options): View {
     // Focus before the browser inserts the character so typing uses the normal input event.
     search.focus();
   });
-  labelFilter.addEventListener('change', renderList);
+  labelFilter.addEventListener('click', () => {
+    if (!labelTiles.hidden) {
+      closeLabelTiles();
+      return;
+    }
+    labelTiles.hidden = false;
+    labelFilter.setAttribute('aria-expanded', 'true');
+    for (const tile of labelTiles.querySelectorAll('button')) {
+      const selected = tile.value === selectedLabelId;
+      tile.setAttribute('aria-pressed', String(selected));
+      if (selected) tile.focus();
+    }
+  });
+  root.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !labelTiles.hidden) {
+      closeLabelTiles();
+      labelFilter.focus();
+    }
+  });
 
   return {
     path: '/bookmarks',
@@ -180,6 +223,7 @@ export function initBookmarks({ store, pin }: Options): View {
     render,
     leave() {
       closeMenu();
+      closeLabelTiles();
       if (editor.open) editor.close();
     },
   };

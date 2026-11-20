@@ -189,6 +189,9 @@ h1 {
 }
 
 .label-filter {
+  display: flex;
+  align-items: center;
+  gap: 7px;
   max-width: 36%;
   min-width: 0;
   height: 51px;
@@ -199,17 +202,46 @@ h1 {
   color: var(--muted);
   font: inherit;
   font-size: 14px;
-  text-overflow: ellipsis;
-  cursor: pointer;
 
-  &:has(option:checked:not([value=""])) {
+  svg { flex: none; width: 16px; height: 16px; }
+  span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  &.active, &[aria-expanded="true"] {
     background: var(--accent-tint);
     color: var(--accent);
   }
+}
 
-  &:focus-visible {
-    outline: 3px solid var(--accent);
-    outline-offset: 3px;
+.label-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 8.5rem), 1fr));
+  gap: 8px;
+  margin-bottom: 20px;
+
+  button {
+    min-height: 54px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    text-align: start;
+
+    &:hover { background: var(--soft); }
+    &[aria-pressed="true"] {
+      border-color: var(--accent);
+      background: var(--accent-tint);
+    }
+  }
+
+  .bookmark-label {
+    padding: 0;
+    background: transparent;
+    font: inherit;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 }
 
