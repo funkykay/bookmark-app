@@ -16,10 +16,6 @@
   **Problem:** Nach dem Bearbeiten eines Lesezeichens verliert die Tastaturbedienung den Fokus auf der Karte.  
   **Lösung:** Setze den Fokus nach dem Speichern auf die Bearbeiten-Schaltfläche derselben Karte zurück.
 
-- [ ] **BM-005 · Neue Datenfelder beim Bearbeiten und im Backup erhalten**  
-  **Problem:** Neue Felder wie „Favorit“ können beim Bearbeiten oder beim Einlesen eines Backups verloren gehen, wenn eine der beteiligten Stellen das Feld übersieht.  
-  **Lösung:** Definiere für jedes neue Feld einen Standardwert für ältere Daten und teste, dass sein Wert beim Bearbeiten, Exportieren und erneuten Importieren erhalten bleibt.
-
 - [x] **BM-006 · Such- und Filterlogik aus der Ansicht lösen**  
   **Problem:** Die Lesezeichenansicht verwaltet Suche, Filter, Liste, Menü und Editor gemeinsam, wodurch kleine Erweiterungen mehrere Bedienabläufe berühren.  
   **Lösung:** Lagere zuerst die Berechnung der sichtbaren Lesezeichen in eine eigenständig testbare Funktion aus und übergib das Ergebnis an die Liste.
